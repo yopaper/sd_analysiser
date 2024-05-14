@@ -16,6 +16,6 @@ prompt_data_path = data_base_path + "prompt_list.txt"
 image_info_path = data_base_path + "image_data_info/"
 image_file_path = data_base_path + "image_data_file/"
 
-display_image_width = 200
-display_image_height = 200
+display_image_width = 170
+display_image_height = 170
 display_image_wh_rate = display_image_width/display_image_height

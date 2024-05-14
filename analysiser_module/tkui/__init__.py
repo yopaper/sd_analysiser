@@ -1,5 +1,6 @@
 
 from .. import tk
+from .. import ttk
 from .. import messagebox
 
 from . import basic_window
@@ -9,3 +10,4 @@ from . import prompt_manager_menu
 from . import wait_sd_window
 from . import checkpoint_set_menu
 from . import image_generator_menu
+from . import analysiser_option_menu

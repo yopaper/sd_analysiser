@@ -11,7 +11,16 @@ class ImageData:
         self.image_info_path = get_image_info_path( file_name )
         self.tk_image = None
         self.image_info = None
+        self.prompt_table = None
         image_data_list.append( self )
+    #-----------------------------------------------------------------------------
+    def get_prompt(self)->tuple[str]:
+        from . import prompt_key
+        if( self.prompt_table==None ):
+            prompt_str = self.get_info()[ prompt_key.PROMPT_KEY ]
+            prompt_split = prompt_str.split(",")
+            self.prompt_table = [ p.strip() for p in prompt_split ]
+        return tuple( self.prompt_table )
     #-----------------------------------------------------------------------------
     def get_info(self)->dict:
         from . import json
@@ -59,6 +68,7 @@ def save_image_data(image, image_info:dict, file_name:str=None):
         file_writer.write( image )
     with open( image_info_path, "w" )as file_writer:
         file_writer.write( json.dumps( image_info ) )
+    ImageData( file_name )
 #---------------------------------------------------------------------------------
 def get_counter_file_name()->str:
     from . import os
@@ -69,6 +79,9 @@ def get_counter_file_name()->str:
         if( not os.path.exists( file_path ) ):
             return name
         image_data_file_counter += 1
+#---------------------------------------------------------------------------------
+def get_image_datas()->tuple[ ImageData ]:
+    return tuple( image_data_list )
 #---------------------------------------------------------------------------------
 def load_image_datas():
     from . import os, config_data

@@ -2,12 +2,14 @@ from . import os
 from . import config_data
 
 tag_table = {}
+tag_list = []
 
 class PromptTag:
     
     def __init__(self, prompt:str) -> None:
         self.prompt = prompt
         tag_table[ self.prompt ] = self
+        tag_list.append( self )
     #------------------------------------------------------
     def tag(self)->str:
         return self.prompt
@@ -15,6 +17,9 @@ class PromptTag:
     
 #=======================================================================
 
+def get_all_prompts()->tuple[PromptTag]:
+    return tuple( tag_list )
+#------------------------------------------------------------------------
 def has_prompt(prompt:str)->bool:
     prompt = prompt.strip()
     return prompt in tag_table

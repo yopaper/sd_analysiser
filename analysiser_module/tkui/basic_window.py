@@ -4,6 +4,7 @@ class BasicWindow:
     def __init__(self):
         self.window = tk.Toplevel()
         self.window.resizable(False, False)
+        self.window.protocol( "WM_DELETE_WINDOW", self.close )
     #---------------------------------------------------------
     def open(self):
         from . import main_menu
