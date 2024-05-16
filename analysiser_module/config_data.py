@@ -16,6 +16,12 @@ prompt_data_path = data_base_path + "prompt_list.txt"
 image_info_path = data_base_path + "image_data_info/"
 image_file_path = data_base_path + "image_data_file/"
 
-display_image_width = 170
-display_image_height = 170
+#------------------------------------------------------------------------------
+# 影像分析模型檔案路徑
+analysiser_base_path = "./analysisers_data/"
+analysiser_list_file_path =  analysiser_base_path + "analysiser_list.txt"
+
+#------------------------------------------------------------------------------
+display_image_width = 360
+display_image_height = 360
 display_image_wh_rate = display_image_width/display_image_height

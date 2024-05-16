@@ -33,7 +33,7 @@ def txt_to_image( prompt:str, negative_prompt:str="", seed:int=None, step:int=20
     info[prompt_key.STEP_KEY] = step
     info_str = json.dumps(info)
 
-    info[ prompt_key.CHECK_POINT_KEY ] = checkpoints_loader.current_checkpoint.title
+    info[ prompt_key.CHECK_POINT_KEY ] = checkpoints_loader.get_current_checkpoint().title
     
     response = requests.post( url=config_data.sd_txt2img_api_url, data=info_str ).json()
     response = response["images"][0]

@@ -19,7 +19,7 @@ class ImageDisplayer:
         self.info_label.config(text="")
     #---------------------------------------------------------------------------------
     def load_image_data(self, image_data:image_data_handler.ImageData):
-        from .. import prompt_key
+        from .. import prompt_key, checkpoints_loader
         self.reset()
         if( image_data==None ):return
         #print("載入:"+image_data.file_name)
@@ -31,54 +31,18 @@ class ImageDisplayer:
             info_str += "●提示詞:\n{0}\n".format( info_dict[ prompt_key.PROMPT_KEY ] )
         if( prompt_key.SEED_KEY in info_dict ):
             info_str += "●種子:\n{0}\n".format( info_dict[ prompt_key.SEED_KEY ] )
+        checkpoint = image_data.get_checkpoint()
+        if( checkpoint!=None ):
+            info_str += "●Checkpoint模型:\n{0}\n".format( checkpoint.name )
         self.info_label.config(text=info_str)
         #print("開始繪製")
         self.canvas.create_image( (0, 0), anchor="nw", image=image_data.get_tk_image() )
-    #---------------------------------------------------------------------------------
-#=====================================================================================
-class FilterUI:
-    def __init__(self, menu):
-        from .. import prompt_tag
-        self.enable_prompts = []
-        self.menu = menu
-
-        self.filter_ui_frame = tk.LabelFrame( menu.left_ui_group, text="圖片篩選" )
-        tk.Label( self.filter_ui_frame, text="提示詞篩選" ).grid( column=0, row=0 )
-        self.prompt_filter_listbox = tk.Listbox( self.filter_ui_frame, selectmode=tk.SINGLE )
-        self.prompt_filter_listbox.grid( column=0, row=1 )
-        self.prompt_filter_listbox.bind("<<ListboxSelect>>", self.on_listbox_selected)
-
-        for prompt in prompt_tag.get_all_prompts():
-            self.prompt_filter_listbox.insert( "end", "－ "+prompt.tag() )
-    #---------------------------------------------------------------------------------
-    def on_listbox_selected(self, evt):
-        from .. import prompt_tag, image_data_filter
-        selection = self.prompt_filter_listbox.curselection()
-        if( len( selection )<=0 ):return
-        selection = selection[0]
-        prompt = prompt_tag.get_all_prompts()[selection]
-
-        self.prompt_filter_listbox.insert("end", "19890604")
-        self.prompt_filter_listbox.delete( selection )
-        if( prompt in self.enable_prompts ):
-            self.enable_prompts.remove( prompt )
-            
-            self.prompt_filter_listbox.insert( selection, "－ "+prompt.tag() )
-        else:
-            self.enable_prompts.append( prompt )
-            self.prompt_filter_listbox.insert( selection, "● "+prompt.tag() )
-            
-        self.prompt_filter_listbox.delete("end")
-
-        data_filter = image_data_filter.ImageDataFilter( self.enable_prompts, mode=image_data_filter.ImageDataFilter.OR_MODE )
-        self.menu.set_images_to_show( data_filter.get_result() )
-    #---------------------------------------------------------------------------------
-
 #=====================================================================================
 
 class ImageViewerMenu(basic_window.BasicWindow):
     from .. import image_data_handler
     def __init__(self):
+        from . import filter_ui
         from .. import image_data_handler
         super().__init__()
         self.window.title("圖片資料瀏覽")
@@ -86,10 +50,11 @@ class ImageViewerMenu(basic_window.BasicWindow):
 
         self.left_ui_group = tk.Frame(self.window)
         self.left_ui_group.grid( column=0, row=1 )
-
-        self.filter_ui = FilterUI( self )
-        self.filter_ui.filter_ui_frame.grid( column=0, row=1 )
         
+        self.filter_ui = filter_ui.FullFilterUI( self.left_ui_group )
+        self.filter_ui.grid( column=0, row=2 )
+        self.filter_ui.set_click_event( self.on_filter_ui_update )
+
         self.exit_button = tk.Button( self.window, text=" 返回 ", command=self.close )
         self.exit_button.grid( column=2, row=0 )
         # 頁面切換UI
@@ -97,19 +62,20 @@ class ImageViewerMenu(basic_window.BasicWindow):
         self.page_ui_group.grid( column=0, row=0 )
         # 上一頁
         self.last_page_button = tk.Button( self.page_ui_group, text="上一頁", command=lambda delta=-1:self.change_page(delta) )
-        self.last_page_button.grid( column=0, row=0 )
+        self.last_page_button.grid( column=0, row=0, padx=4, pady=4 )
+        # 頁數Label
         self.page_label = tk.Label( self.page_ui_group, text="" )
-        self.page_label.grid( column=1, row=0 )
+        self.page_label.grid( column=1, row=0, padx=4, pady=4 )
         # 下一頁
         self.next_page_button = tk.Button( self.page_ui_group, text="下一頁", command=lambda delta=1:self.change_page(delta) )
-        self.next_page_button.grid( column=2, row=0 )
+        self.next_page_button.grid( column=2, row=0, padx=4, pady=4 )
 
         self.page = 0
-        image_group_width = 4; image_group_height = 4
+        image_group_width = 3; image_group_height = 3
         self.displayer_number = image_group_width * image_group_height
         # 圖片展示群組
         self.image_group = tk.LabelFrame( self.window, text="圖片" )
-        self.image_group.grid( column=1, row=1, rowspan=1 )
+        self.image_group.grid( column=1, row=1, rowspan=1, padx=8, pady=8 )
         self.displayer_list = []
         for y in range(image_group_height):
             for x in range( image_group_width ):
@@ -118,10 +84,11 @@ class ImageViewerMenu(basic_window.BasicWindow):
                 self.displayer_list.append( displayer )
         
         self.window_center(200)
-        self.change_page(0)
+        self.filter_ui.update()
     #-------------------------------------------------------------------------------------
-    def set_images_to_show(self, images_to_show:tuple[image_data_handler.ImageData]):
-        self.image_to_show = images_to_show
+    def on_filter_ui_update(self):
+        data_filter = self.filter_ui.get_filter()
+        self.image_to_show = data_filter.get_result()
         self.change_page(0)
     #-------------------------------------------------------------------------------------
     def change_page(self, delta:int):

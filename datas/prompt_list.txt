@@ -1,13 +1,9 @@
-girl
-boy
-long hair
-short hair
-red hair
-blue hair
-black hair
-white hair
-skirt
-pants
-cherry blossom
-samurai
-bow
+dog
+trees
+river
+desert
+tank
+dice
+bomber
+war
+forest

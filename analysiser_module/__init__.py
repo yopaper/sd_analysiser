@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+from tkinter import simpledialog
 from tkinter import messagebox
 from tkinter import ttk
 import requests
@@ -32,5 +33,6 @@ def main():
     tkui.main_menu.get_instance().open()
 
     prompt_tag.write_to_file()
+    analysiser.analysiser_core.write_to_file()
 #--------------------------------------------------------------
 main()

@@ -11,8 +11,8 @@ class CheckPointSetMenu(basic_window.BasicWindow):
         self.selected_checkpoint_title = tk.StringVar()
         self.checkpoint_button_table = {}
         i = 1
-        for cp in checkpoints_loader.checkpoint_list:
-            cp_button = tk.Radiobutton( self.window, text=cp.name, variable=self.selected_checkpoint_title, value=cp.title )
+        for cp in checkpoints_loader.get_all_chechpoints():
+            cp_button = tk.Radiobutton( self.window, text=cp.title, variable=self.selected_checkpoint_title, value=cp.title )
             cp_button.grid( column=0, row=i )
             self.checkpoint_button_table[ cp.title ] = cp_button
             i += 1

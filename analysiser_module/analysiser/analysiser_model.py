@@ -1,29 +1,30 @@
 from . import torch
 from . import basic_block
 nn = torch.nn
-class ImageAnalysiser( torch.Module ):
-    def __init__(self, name:str):
+
+_instance = None
+#=================================================================================
+class ImageAnalysiser( nn.Module ):
+    def __init__(self):
         super( ImageAnalysiser, self ).__init__()
-        self.name = name
-        
         self.start_layer = nn.Sequential(
             nn.Conv2d(
-                in_channels=in_channels, out_channels=dim_counter.get(0),
+                in_channels=3, out_channels=8,
                 kernel_size=4, padding=1, stride=2, padding_mode="reflect"
             ),
             nn.LeakyReLU( 0.2 ),
         )
         self.main = nn.Sequential(
             basic_block.ConvBlock(
-                in_channels = dim_counter.get(0),
-                out_channels = dim_counter.get(1),
+                in_channels = 8,
+                out_channels = 16,
                 conv_mode = basic_block.ConvBlock.DOWN_SAMPLE,
                 non_linear_act = basic_block.ConvBlock.LEAKY_RELU,
                 have_drop_out = False
             ),
             basic_block.ConvBlock(
-                in_channels = dim_counter.get(1),
-                out_channels = dim_counter.get(2),
+                in_channels = 16,
+                out_channels = 32,
                 conv_mode = basic_block.ConvBlock.DOWN_SAMPLE,
                 non_linear_act = basic_block.ConvBlock.LEAKY_RELU,
                 have_drop_out = False
@@ -31,14 +32,14 @@ class ImageAnalysiser( torch.Module ):
         )
         self.end_layer = nn.Sequential(
                 nn.Conv2d(
-                    in_channels=dim_counter.get(2),
-                    out_channels=dim_counter.get(3),
+                    in_channels=32,
+                    out_channels=64,
                     kernel_size=4, padding=1, stride=1, padding_mode="reflect", bias=False
                 ),
-                nn.BatchNorm2d( dim_counter.get(3) ),
+                nn.BatchNorm2d( 64 ),
                 nn.LeakyReLU(0.2),
                 nn.Conv2d(
-                    in_channels=dim_counter.get(3),
+                    in_channels=64,
                     out_channels=1,
                     kernel_size=4, padding=1, stride=1, padding_mode="reflect"
                 ),
@@ -52,4 +53,13 @@ class ImageAnalysiser( torch.Module ):
         x = self.main( x )
         x = self.end_layer( x )
         return x
+#---------------------------------------------------------------------------------
+    def load_weight(self):
+        self.load_state_dict()
 #=================================================================================
+def get_instance()->ImageAnalysiser:
+    global _instance
+    if( _instance==None ):
+        _instance = ImageAnalysiser()
+    return _instance
+#----------------------------------------------------------------------------------

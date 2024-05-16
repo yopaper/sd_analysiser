@@ -3,7 +3,7 @@ image_data_list = []
 
 #================================================================================
 class ImageData:
-    from . import ImageTk, Image
+    from . import ImageTk, Image, checkpoints_loader
     def __init__(self, file_name:str):
         from . import config_data
         self.file_name = file_name
@@ -13,6 +13,13 @@ class ImageData:
         self.image_info = None
         self.prompt_table = None
         image_data_list.append( self )
+    #-----------------------------------------------------------------------------
+    def get_checkpoint(self)->checkpoints_loader.SDCheckpoint:
+        from . import prompt_key, checkpoints_loader
+        info = self.get_info()
+        if( prompt_key.CHECK_POINT_KEY in info ):
+            return checkpoints_loader.get_with_title( info[ prompt_key.CHECK_POINT_KEY ] )
+        return None
     #-----------------------------------------------------------------------------
     def get_prompt(self)->tuple[str]:
         from . import prompt_key
@@ -44,7 +51,13 @@ class ImageData:
                 pil_image = pil_image.resize( ( round( pil_image.width*size_rate), round(pil_image.height*size_rate) ) )
             self.tk_image = ImageTk.PhotoImage( pil_image )
         return self.tk_image
-
+    #-----------------------------------------------------------------------------
+    def get_seed(self)->int:
+        from . import prompt_key
+        info = self.get_info()
+        if( prompt_key.SEED_KEY in info ):
+            return info[ prompt_key.SEED_KEY ]
+        return None
 #=================================================================================
 
 image_data_file_counter = 1

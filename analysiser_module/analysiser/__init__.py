@@ -1,6 +1,11 @@
 from .. import messagebox
 
 import torch
-from torch import nn
-import basic_block
-import analysiser_model
+nn = torch.nn
+import torchvision
+
+from . import basic_block
+from . import name_checker
+from . import analysiser_model
+from . import analysiser_file
+from . import analysiser_core

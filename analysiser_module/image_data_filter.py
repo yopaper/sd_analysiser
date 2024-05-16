@@ -1,16 +1,18 @@
 
 class ImageDataFilter:
-    from . import prompt_tag, image_data_handler
+    from . import prompt_tag, image_data_handler, checkpoints_loader
     AND_MODE = "and"; OR_MODE = "or"
-    def __init__(self, tags:tuple[prompt_tag.PromptTag], mode:str):
+    def __init__(self, tags:tuple[prompt_tag.PromptTag], checkpoint:checkpoints_loader.SDCheckpoint, mode:str):
         from . import image_data_handler
         self.tags = tuple(tags)
+        self.checkpoint = checkpoint
         mode_table = (ImageDataFilter.AND_MODE, ImageDataFilter.OR_MODE)
         assert mode in mode_table, "mode 不可為 {0}".format(mode)
         self.mode = mode
         self.result = []
         for data in image_data_handler.get_image_datas():
             if( self.mode == ImageDataFilter.AND_MODE and len( self.tags )!=len( data.get_prompt() ) ):continue
+            if( self.checkpoint!=None and self.checkpoint!=data.get_checkpoint() ):continue
             pass_flag = True
             for tag in self.tags:
                 if( tag.tag() not in data.get_prompt() ):
