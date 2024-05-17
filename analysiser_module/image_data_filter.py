@@ -9,18 +9,26 @@ class ImageDataFilter:
         mode_table = (ImageDataFilter.AND_MODE, ImageDataFilter.OR_MODE)
         assert mode in mode_table, "mode 不可為 {0}".format(mode)
         self.mode = mode
-        self.result = []
+        self._result = []
+        self._negative_result = []
         for data in image_data_handler.get_image_datas():
-            if( self.mode == ImageDataFilter.AND_MODE and len( self.tags )!=len( data.get_prompt() ) ):continue
             if( self.checkpoint!=None and self.checkpoint!=data.get_checkpoint() ):continue
-            pass_flag = True
+            pass_flag = True; negative_flag = True
+            if( self.mode == ImageDataFilter.AND_MODE and len( self.tags )!=len( data.get_prompt() ) ):
+                pass_flag = False
             for tag in self.tags:
-                if( tag.tag() not in data.get_prompt() ):
+                if( tag.tag() in data.get_prompt() ):
+                    negative_flag = False
+                else:
                     pass_flag = False
-                    break
             if( pass_flag ):
-                self.result.append( data )
+                self._result.append( data )
+            if( negative_flag ):
+                self._negative_result.append( data )
     #---------------------------------------------------------------------------
     def get_result(self)->tuple[ image_data_handler.ImageData ]:
-        return tuple( self.result )
+        return tuple( self._result )
+    #---------------------------------------------------------------------------
+    def get_negative_result(self)->tuple[ image_data_handler.ImageData ]:
+        return tuple( self._negative_result )
 #===============================================================================

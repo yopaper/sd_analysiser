@@ -46,9 +46,11 @@ def get_all_alalysisers()->tuple[ AnalysiserCore ]:
     return tuple( analysiser_list )
 #---------------------------------------------------------------------------
 def write_to_file():
+    global _init_load_finish
     from .. import os, config_data
     if( not os.path.exists( config_data.analysiser_base_path ) ):
         os.makedirs( config_data.analysiser_base_path )
+    if( not _init_load_finish ):return
     with open( config_data.analysiser_list_file_path, "w" )as file_writer:
         for ac in get_all_alalysisers():
             file_writer.write( ac.get_name()+"\n" )

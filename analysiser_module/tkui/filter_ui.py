@@ -134,7 +134,8 @@ class FullFilterUI:
             mode = self.prompts_ui.get_filter_mode()
         )
         data_number = len(self.current_filter.get_result())
-        self.data_number_label.config( text="符合圖片數量:{0}".format(data_number) )
+        negative_data_number = len( self.current_filter.get_negative_result() )
+        self.data_number_label.config( text="符合圖片數量: {0}\n相反圖片數量: {1}".format(data_number, negative_data_number) )
         if( self.on_click!=None ):self.on_click()
     #-----------------------------------------------------------------------------------
     def set_click_event( self, event ):
