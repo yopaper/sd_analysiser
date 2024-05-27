@@ -1,4 +1,7 @@
 
+from . import info_key
+
+
 image_data_list = []
 
 #================================================================================
@@ -9,22 +12,23 @@ class ImageData:
         self.file_name = file_name
         self.image_file_path = get_image_file_path( file_name )
         self.image_info_path = get_image_info_path( file_name )
+        self.pil_image = None
         self.tk_image = None
         self.image_info = None
         self.prompt_table = None
         image_data_list.append( self )
     #-----------------------------------------------------------------------------
     def get_checkpoint(self)->checkpoints_loader.SDCheckpoint:
-        from . import prompt_key, checkpoints_loader
+        from . import checkpoints_loader
         info = self.get_info()
-        if( prompt_key.CHECK_POINT_KEY in info ):
-            return checkpoints_loader.get_with_title( info[ prompt_key.CHECK_POINT_KEY ] )
+        if( info_key.CHECK_POINT_KEY in info ):
+            return checkpoints_loader.get_with_title( info[ info_key.CHECK_POINT_KEY ] )
         return None
     #-----------------------------------------------------------------------------
     def get_prompt(self)->tuple[str]:
-        from . import prompt_key
+        from . import info_key
         if( self.prompt_table==None ):
-            prompt_str = self.get_info()[ prompt_key.PROMPT_KEY ]
+            prompt_str = self.get_info()[ info_key.PROMPT_KEY ]
             prompt_split = prompt_str.split(",")
             self.prompt_table = [ p.strip() for p in prompt_split ]
         return tuple( self.prompt_table )
@@ -36,10 +40,16 @@ class ImageData:
                 self.image_info = json.load( file_reader )
         return self.image_info
     #-----------------------------------------------------------------------------
+    def get_pil_image(self)->Image:
+        from . import Image
+        if( self.pil_image==None ):
+            self.pil_image = Image.open( self.image_file_path )
+        return self.pil_image
+    #-----------------------------------------------------------------------------
     def get_tk_image(self)->ImageTk:
-        from . import Image, ImageTk, config_data
+        from . import ImageTk, config_data
         if( self.tk_image==None ):
-            pil_image = Image.open( self.image_file_path )
+            pil_image = self.get_pil_image()
             wh_rate = pil_image.width / pil_image.height
             # 若寬度較大
             if( wh_rate > config_data.display_image_wh_rate ):
@@ -53,10 +63,10 @@ class ImageData:
         return self.tk_image
     #-----------------------------------------------------------------------------
     def get_seed(self)->int:
-        from . import prompt_key
+        from . import info_key
         info = self.get_info()
-        if( prompt_key.SEED_KEY in info ):
-            return info[ prompt_key.SEED_KEY ]
+        if( info_key.SEED_KEY in info ):
+            return info[ info_key.SEED_KEY ]
         return None
 #=================================================================================
 

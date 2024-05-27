@@ -1,5 +1,0 @@
-PROMPT_KEY = "prompt"
-NEGATIVE_KEY = "negative_prompt"
-SEED_KEY = "seed"
-STEP_KEY = "steps"
-CHECK_POINT_KEY = "sd_model_checkpoint"

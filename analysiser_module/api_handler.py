@@ -20,20 +20,20 @@ checkpoints_model_table = ()
 def txt_to_image( prompt:str, negative_prompt:str="", seed:int=None, step:int=20 ):
     from random import randint
     from sys import maxsize
-    from . import prompt_key
+    from . import info_key
     from . import checkpoints_loader
     info = {}
-    info[prompt_key.PROMPT_KEY] = prompt
+    info[info_key.PROMPT_KEY] = prompt
     # negative_prompt
-    info[prompt_key.NEGATIVE_KEY] = negative_prompt
+    info[info_key.NEGATIVE_KEY] = negative_prompt
     # seed
-    if(seed!=None):info[prompt_key.SEED_KEY] = seed
-    else:info[prompt_key.SEED_KEY] = randint(0, maxsize)
+    if(seed!=None):info[info_key.SEED_KEY] = seed
+    else:info[info_key.SEED_KEY] = randint(0, maxsize)
     # step
-    info[prompt_key.STEP_KEY] = step
+    info[info_key.STEP_KEY] = step
     info_str = json.dumps(info)
 
-    info[ prompt_key.CHECK_POINT_KEY ] = checkpoints_loader.get_current_checkpoint().title
+    info[ info_key.CHECK_POINT_KEY ] = checkpoints_loader.get_current_checkpoint().title
     
     response = requests.post( url=config_data.sd_txt2img_api_url, data=info_str ).json()
     response = response["images"][0]

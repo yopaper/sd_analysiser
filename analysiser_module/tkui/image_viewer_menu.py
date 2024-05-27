@@ -1,3 +1,4 @@
+from .. import info_key
 from . import tk
 from . import basic_window
 
@@ -19,7 +20,7 @@ class ImageDisplayer:
         self.info_label.config(text="")
     #---------------------------------------------------------------------------------
     def load_image_data(self, image_data:image_data_handler.ImageData):
-        from .. import prompt_key, checkpoints_loader
+        from .. import checkpoints_loader
         self.reset()
         if( image_data==None ):return
         #print("載入:"+image_data.file_name)
@@ -27,10 +28,10 @@ class ImageDisplayer:
         info_dict = image_data.get_info()
         info_str = ""
         info_str += "●檔案名稱:\n{0}\n".format( image_data.file_name )
-        if( prompt_key.PROMPT_KEY in info_dict ):
-            info_str += "●提示詞:\n{0}\n".format( info_dict[ prompt_key.PROMPT_KEY ] )
-        if( prompt_key.SEED_KEY in info_dict ):
-            info_str += "●種子:\n{0}\n".format( info_dict[ prompt_key.SEED_KEY ] )
+        if( info_key.PROMPT_KEY in info_dict ):
+            info_str += "●提示詞:\n{0}\n".format( info_dict[ info_key.PROMPT_KEY ] )
+        if( info_key.SEED_KEY in info_dict ):
+            info_str += "●種子:\n{0}\n".format( info_dict[ info_key.SEED_KEY ] )
         checkpoint = image_data.get_checkpoint()
         if( checkpoint!=None ):
             info_str += "●Checkpoint模型:\n{0}\n".format( checkpoint.name )
@@ -71,7 +72,7 @@ class ImageViewerMenu(basic_window.BasicWindow):
         self.next_page_button.grid( column=2, row=0, padx=4, pady=4 )
 
         self.page = 0
-        image_group_width = 3; image_group_height = 3
+        image_group_width = 3; image_group_height = 2
         self.displayer_number = image_group_width * image_group_height
         # 圖片展示群組
         self.image_group = tk.LabelFrame( self.window, text="圖片" )

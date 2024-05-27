@@ -43,6 +43,7 @@ class ImageAnalysiser( nn.Module ):
                     out_channels=1,
                     kernel_size=4, padding=1, stride=1, padding_mode="reflect"
                 ),
+                nn.Sigmoid(),
             )
 #---------------------------------------------------------------------------------
     def forward(self, x:torch.Tensor):

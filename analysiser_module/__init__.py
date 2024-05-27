@@ -1,3 +1,4 @@
+import importlib
 import os
 import tkinter as tk
 from tkinter import simpledialog
@@ -18,7 +19,7 @@ from . import prompt_tag
 from . import checkpoints_loader
 from . import image_data_handler
 from . import image_data_filter
-from . import prompt_key
+from . import info_key
 from . import image_data_generator
 from . import item_arranger
 
