@@ -29,18 +29,39 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         # 模型訓練UI
         self.train_ui_frame = tk.LabelFrame( self.window, text="訓練" )
         self.train_ui_frame.grid(row=1, column=0, padx=6, pady=6)
-        tk.Label( self.train_ui_frame, text="訓練Epoch" ).grid(column=0, row=0, padx=4, pady=4)
-        self.train_epoch_spinbox = tk.Spinbox( self.train_ui_frame, from_=1, to=890604 )
-        self.train_epoch_spinbox.grid( column=1, row=0, padx=6, pady=6 )
 
+
+        
+        # 資料篩選 UI
         self.train_data_filter_frame = tk.LabelFrame(self.train_ui_frame, text="訓練資料篩選")
-        self.train_data_filter_frame.grid( column=0, row=1, columnspan=2, padx=6, pady=6 )
+        self.train_data_filter_frame.grid( column=0, row=0, columnspan=1, padx=6, pady=6 )
 
         self.data_number_label = tk.Label(self.train_data_filter_frame)
         self.data_number_label.grid( column=0, row=0 )
         self.data_filter_ui = filter_ui.FullFilterUI( self.train_data_filter_frame )
         self.data_filter_ui.grid( column=0, row=1 )
         self.data_filter_ui.set_click_event( self._update_data_number_ui )
+
+        # 訓練參數........................................................................................
+        self.train_parameters_frame = tk.LabelFrame( self.train_ui_frame, text="訓練參數" )
+        self.train_parameters_frame.grid( column=1, row=0, padx=6, pady=6 )
+        # Epoch
+        tk.Label( self.train_parameters_frame, text="訓練 Epoch" ).grid( column=0, row=0, padx=6, pady=6 )
+        self.train_epoch_spinbox = tk.Spinbox( self.train_parameters_frame, from_=1, to=890604 )
+        self.train_epoch_spinbox.grid( column=1, row=0, padx=6, pady=6 )
+        # Learning Rate
+        tk.Label( self.train_parameters_frame, text="Learning Rate" ).grid( column=0, row=1, padx=6, pady=6 )
+        self.learning_rate_var = tk.StringVar( self.window )
+        self.learning_rate_var.set( "2e-4" )
+        self.learning_rate_entry = tk.Entry( self.train_parameters_frame, textvariable=self.learning_rate_var )
+        self.learning_rate_entry.grid( column=1, row=1, padx=6, pady=6 )
+        # Batch Size
+        tk.Label( self.train_parameters_frame, text="Batch Size" ).grid( column=0, row=2, padx=6, pady=6 )
+        self.batch_size_var = tk.StringVar( self.window )
+        self.batch_size_var.set( "16" )
+        self.batch_size_entry = tk.Entry( self.train_parameters_frame, textvariable=self.batch_size_var )
+        self.batch_size_entry.grid( column=1, row=2, padx=6, pady=6 )
+
         self.start_train_button = tk.Button( self.train_data_filter_frame, text="開始訓練", command=self.start_train )
         self.start_train_button.grid( column=0, row=2 )
 

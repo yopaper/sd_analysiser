@@ -13,3 +13,4 @@ from . import analysiser_dataset
 from . import analysiser_file
 from . import analysiser_core
 from . import analysiser_trainer
+from . import analysiser_processor

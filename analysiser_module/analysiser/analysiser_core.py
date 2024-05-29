@@ -5,13 +5,14 @@ _need_to_save = False
 
 #===========================================================================
 class AnalysiserCore:
-    from . import analysiser_model, analysiser_file, analysiser_info
+    from . import analysiser_model, analysiser_file, analysiser_info, analysiser_processor
     
     def __init__(self, name:str):
-        from . import analysiser_file, analysiser_info
+        from . import analysiser_file, analysiser_info, analysiser_processor
         self.name = name
-        self.file_handler = analysiser_file.AnalysiserFile(self)
+        self.file_handler = analysiser_file.AnalysiserFile( self )
         self.info = analysiser_info.AnalysiserInfo( self )
+        self.processor = analysiser_processor.AnalysiserProcessor( self )
         self.model = None
         analysiser_list.append( self )
         analysiser_name_table[ self.name ] = self
@@ -24,11 +25,17 @@ class AnalysiserCore:
     #-----------------------------------------------------------------------
     def get_name(self)->str:return self.name
     #-----------------------------------------------------------------------
+    def get_processor(self)->analysiser_processor.AnalysiserProcessor:
+        return self.processor
+    #-----------------------------------------------------------------------
     def get_model(self)->analysiser_model.ImageAnalysiser:
         from . import analysiser_model
         if( self.model == None ):
             self.model = analysiser_model.ImageAnalysiser()
         return self.model
+    #-----------------------------------------------------------------------
+    def free_model(self)->None:
+        self.model = None
 #===========================================================================
 
 def create_core( name:str )->AnalysiserCore:

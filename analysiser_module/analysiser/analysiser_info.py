@@ -4,6 +4,7 @@ class AnalysiserInfo:
         from . import analysiser_core
         self._core:analysiser_core.AnalysiserCore = core
         self._info_dict = {}
+        self._info_loaded = False
     #-----------------------------------------------------------------------
     def get_info_dict(self)->dict:return self._info_dict
     #-----------------------------------------------------------------------
@@ -15,6 +16,7 @@ class AnalysiserInfo:
             json_table = json.load( file_reader )
             for key in json_table:
                 self._info_dict[key] = json_table[key]
+        self._info_loaded = True
     #-----------------------------------------------------------------------
     def get_info_with_key(self, key:str):
         if( key in self._info_dict ):
@@ -28,4 +30,13 @@ class AnalysiserInfo:
     def get_batch_size(self)->int:
         from .. import info_key
         return self.get_info_with_key( info_key.BATCH_SIZE_KEY )
-    #------------------------------------------------------------------------
+    #-----------------------------------------------------------------------
+    def get_prompts(self)->tuple[ str ]:
+        from .. import info_key
+        prompt_list = self.get_info_with_key( info_key.PROMPT_KEY )
+        if( prompt_list != None ):
+            return tuple( prompt_list )
+        return None
+    #-----------------------------------------------------------------------
+    def have_info(self)->bool:return self._info_loaded
+#=============================================================================

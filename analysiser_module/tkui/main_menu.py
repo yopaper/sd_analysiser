@@ -6,7 +6,7 @@ _instance = None
 class MainMenu(basic_window.BasicWindow):
     #-------------------------------------------------------------------------------------
     def __init__(self):
-        from . import prompt_manager_menu, checkpoint_set_menu, image_generator_menu, image_viewer_menu, analysiser_option_menu
+        from . import prompt_manager_menu, checkpoint_set_menu, image_generator_menu, image_viewer_menu, analysiser_option_menu, analysiser_viewer_menu
         def open_manager_menu():
             #self.close()
             prompt_manager_menu.PromptManagerMenu().open()
@@ -31,26 +31,40 @@ class MainMenu(basic_window.BasicWindow):
             self.window, text="管理提示詞", command=open_manager_menu )
         self.prompt_manager_button.grid(row=0, column=0, padx=5, pady=5)
         
+        self.image_data_frame = tk.LabelFrame(
+            self.window, text="圖片資料"
+        )
+        self.image_data_frame.grid( row=0, column=1, padx=5, pady=5 )
+
         self.image_viewer_button = tk.Button(
-            self.window, text="瀏覽圖片資料", command=open_image_viewer_menu )
-        self.image_viewer_button.grid( row=0, column=1, padx=5, pady=5 )
+            self.image_data_frame, text="瀏覽圖片資料", command=open_image_viewer_menu )
+        self.image_viewer_button.grid( row=0, column=0, padx=5, pady=5 )
 
         self.image_generator_menu_button = tk.Button(
-            self.window, text="生成圖片", command=open_image_generator_menu )
-        self.image_generator_menu_button.grid( row=0, column=2, padx=5, pady=5 )
+            self.image_data_frame, text="生成圖片", command=open_image_generator_menu )
+        self.image_generator_menu_button.grid( row=1, column=0, padx=5, pady=5 )
 
-        self.image_analysiser_button = tk.Button(
-            self.window, text="分析模型", command=lambda: analysiser_option_menu.AnalysiserOptionMenu().open() )
-        self.image_analysiser_button.grid( row=0, column=3, padx=5, pady=5 )
+        self.analysiser_frame = tk.LabelFrame(
+            self.window, text="分析模型"
+        )
+        self.analysiser_frame.grid( row=0, column=2, padx=5, pady=5 )
+    
+        self.analysiser_option_button = tk.Button(
+            self.analysiser_frame, text="分析模型管理", command=lambda: analysiser_option_menu.AnalysiserOptionMenu().open() )
+        self.analysiser_option_button.grid( row=0, column=0, padx=5, pady=5 )
+
+        self.analysiser_viewer_button = tk.Button(
+            self.analysiser_frame, text="分析模型使用", command=lambda: analysiser_viewer_menu.AnalysiserViewerMenu().open() )
+        self.analysiser_viewer_button.grid( row=1, column=0, padx=5, pady=5 )
 
         self.checkpoint_menu_button = tk.Button(
             self.window, text="設定Checkpoint", command=open_checkpoint_menu )
-        self.checkpoint_menu_button.grid(row=0, column=4, padx=5, pady=5)
+        self.checkpoint_menu_button.grid(row=0, column=5, padx=5, pady=5)
 
         self.button_ui = (
             self.prompt_manager_button, self.checkpoint_menu_button,
             self.image_generator_menu_button, self.image_viewer_button,
-            self.image_analysiser_button )
+            self.analysiser_option_button, self.analysiser_viewer_button )
 
         self.window_center()
     #-------------------------------------------------------------------------------------

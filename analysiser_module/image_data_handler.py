@@ -6,7 +6,9 @@ image_data_list = []
 
 #================================================================================
 class ImageData:
-    from . import ImageTk, Image, checkpoints_loader
+    from . import ImageTk, Image, checkpoints_loader, analysiser
+    transform = analysiser.torchvision.transforms.ToTensor()
+    #----------------------------------------------------------------------------
     def __init__(self, file_name:str):
         from . import config_data
         self.file_name = file_name
@@ -61,6 +63,9 @@ class ImageData:
                 pil_image = pil_image.resize( ( round( pil_image.width*size_rate), round(pil_image.height*size_rate) ) )
             self.tk_image = ImageTk.PhotoImage( pil_image )
         return self.tk_image
+    #-----------------------------------------------------------------------------
+    def get_tensor_data(self)->analysiser.torch.Tensor:
+        return ImageData.transform( self.get_pil_image() )
     #-----------------------------------------------------------------------------
     def get_seed(self)->int:
         from . import info_key

@@ -1,15 +1,14 @@
 
 class AnalysiserTrainer:
     from . import analysiser_dataset, analysiser_core
-    from .. import image_data_filter
     def __init__(self,
         analysiser_core: analysiser_core.AnalysiserCore,
-        data_filter:image_data_filter.ImageDataFilter,
-        epoch:int, learn_rate:float, batch_size:int
+        data_filter, epoch:int, learn_rate:float, batch_size:int
     ) -> None:
         from . import torch, torch_data, analysiser_dataset
+        from .. import image_data_filter
         self.core = analysiser_core
-        self.data_filter = data_filter
+        self.data_filter:image_data_filter.ImageDataFilter = data_filter
         data_spliter = analysiser_dataset.DataSpliter( self.data_filter )
         self.train_dataset = analysiser_dataset.AnalysiserDataset( *data_spliter.get_train_data() )
         self.test_dataset = analysiser_dataset.AnalysiserDataset( *data_spliter.get_test_data() )
@@ -100,5 +99,6 @@ class AnalysiserTrainer:
             train_epoch()
             test_epoch()
         save_info()
+        self.core.get_info().load_info()
         print("訓練完成")
 #===============================================================================

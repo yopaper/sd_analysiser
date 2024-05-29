@@ -5,8 +5,12 @@ nn = torch.nn
 _instance = None
 #=================================================================================
 class ImageAnalysiser( nn.Module ):
-    def __init__(self):
+    def __init__(self, core=None):
+        from . import analysiser_core
         super( ImageAnalysiser, self ).__init__()
+        self.core:analysiser_core.AnalysiserCore = core
+        self._have_weight = False
+
         self.start_layer = nn.Sequential(
             nn.Conv2d(
                 in_channels=3, out_channels=8,
@@ -55,8 +59,15 @@ class ImageAnalysiser( nn.Module ):
         x = self.end_layer( x )
         return x
 #---------------------------------------------------------------------------------
+    def have_weight(self)->bool:return self._have_weight
+#---------------------------------------------------------------------------------
     def load_weight(self):
-        self.load_state_dict()
+        from .. import os
+        if( self.core==None ):return
+        file_path = self.core.get_file_handler().get_weight_file_path()
+        if( not os.path.exists( file_path ) ):return
+        self._have_weight = True
+        self.load_state_dict( torch.load( file_path ) )
 #=================================================================================
 def get_instance()->ImageAnalysiser:
     global _instance
