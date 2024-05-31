@@ -26,15 +26,9 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         self.delete_analysiser_button = tk.Button( self.button_row_frame, text="刪除模型" )
         self.delete_analysiser_button.grid( column=2, row=0, padx=5, pady=5 )
 
-        # 模型訓練UI
-        self.train_ui_frame = tk.LabelFrame( self.window, text="訓練" )
-        self.train_ui_frame.grid(row=1, column=0, padx=6, pady=6)
-
-
-        
         # 資料篩選 UI
-        self.train_data_filter_frame = tk.LabelFrame(self.train_ui_frame, text="訓練資料篩選")
-        self.train_data_filter_frame.grid( column=0, row=0, columnspan=1, padx=6, pady=6 )
+        self.train_data_filter_frame = tk.LabelFrame(self.window, text="訓練資料篩選")
+        self.train_data_filter_frame.grid( column=1, row=0, rowspan=3, padx=6, pady=6 )
 
         self.data_number_label = tk.Label(self.train_data_filter_frame)
         self.data_number_label.grid( column=0, row=0 )
@@ -43,8 +37,8 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         self.data_filter_ui.set_click_event( self._update_data_number_ui )
 
         # 訓練參數........................................................................................
-        self.train_parameters_frame = tk.LabelFrame( self.train_ui_frame, text="訓練參數" )
-        self.train_parameters_frame.grid( column=1, row=0, padx=6, pady=6 )
+        self.train_parameters_frame = tk.LabelFrame( self.window, text="訓練參數" )
+        self.train_parameters_frame.grid( column=0, row=1, padx=6, pady=6 )
         # Epoch
         tk.Label( self.train_parameters_frame, text="訓練 Epoch" ).grid( column=0, row=0, padx=6, pady=6 )
         self.train_epoch_spinbox = tk.Spinbox( self.train_parameters_frame, from_=1, to=890604 )
@@ -67,7 +61,7 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
 
         # 模型資訊
         self.info_ui_frame = tk.LabelFrame( self.window, text="模型資訊" )
-        self.info_ui_frame.grid( row=1, column=1, padx=6, pady=6 )
+        self.info_ui_frame.grid( row=2, column=0, padx=6, pady=6 )
         self.info_label = tk.Label(self.info_ui_frame, text="")
         self.info_label.grid( row=0, column=0, padx=6, pady=6 )
 
@@ -100,6 +94,8 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
             batch_size = 16,
         )
         trainer.start_train()
+        core.info.load_info()
+        self._update_ui()
     #---------------------------------------------------------------------------
     def _update_ui(self, event=None)->None:
         core = self.get_selected_core()
@@ -114,7 +110,10 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         
         info_msg = "\n"
         info_msg += "模型名稱: {0}\n".format(core.get_name() )
+        info_msg += "提示詞: {0}\n".format(info.get_prompts())
         info_msg += "訓練 Epoch: {0}\n".format(info.get_epoch())
+        info_msg += "訓練 Batch Size: {0}\n".format( info.get_batch_size() )
+        info_msg += "訓練 Learning Rate: {0}\n".format( info.get_learning_rate() )
         self.info_label.config( text=info_msg )
     #---------------------------------------------------------------------------
     def _update_data_number_ui(self):

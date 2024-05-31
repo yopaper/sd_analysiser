@@ -5,7 +5,7 @@ nn = torch.nn
 _instance = None
 #=================================================================================
 class ImageAnalysiser( nn.Module ):
-    def __init__(self, core=None):
+    def __init__(self, core):
         from . import analysiser_core
         super( ImageAnalysiser, self ).__init__()
         self.core:analysiser_core.AnalysiserCore = core
@@ -24,14 +24,14 @@ class ImageAnalysiser( nn.Module ):
                 out_channels = 16,
                 conv_mode = basic_block.ConvBlock.DOWN_SAMPLE,
                 non_linear_act = basic_block.ConvBlock.LEAKY_RELU,
-                have_drop_out = False
+                have_drop_out = True
             ),
             basic_block.ConvBlock(
                 in_channels = 16,
                 out_channels = 32,
                 conv_mode = basic_block.ConvBlock.DOWN_SAMPLE,
                 non_linear_act = basic_block.ConvBlock.LEAKY_RELU,
-                have_drop_out = False
+                have_drop_out = True
             ),
         )
         self.end_layer = nn.Sequential(
@@ -65,13 +65,16 @@ class ImageAnalysiser( nn.Module ):
         from .. import os
         if( self.core==None ):return
         file_path = self.core.get_file_handler().get_weight_file_path()
-        if( not os.path.exists( file_path ) ):return
+        if( not os.path.exists( file_path ) ):
+            print( "路徑:{0}\n不存在".format(file_path) )
+            return
         self._have_weight = True
         self.load_state_dict( torch.load( file_path ) )
+        print("成功載入權重")
 #=================================================================================
 def get_instance()->ImageAnalysiser:
     global _instance
     if( _instance==None ):
-        _instance = ImageAnalysiser()
+        _instance = ImageAnalysiser(None)
     return _instance
 #----------------------------------------------------------------------------------

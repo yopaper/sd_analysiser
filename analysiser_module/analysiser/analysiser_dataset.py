@@ -11,12 +11,12 @@ class DataSpliter:
         data_filter:image_data_filter.ImageDataFilter = data_filter
         positive_data = data_filter.get_result()
         for data in positive_data:
-            if( data.get_seed()%3==0 ):
+            if( data.get_seed()%2==0 ):
                 self._test_positive_data.append( data )
             else:self._train_positive_data.append( data )
         negative_data = data_filter.get_negative_result()
         for data in negative_data:
-            if( data.get_seed()%3==0 ):
+            if( data.get_seed()%2==0 ):
                 self._test_negative_data.append( data )
             else:self._train_negative_data.append(data)
     #----------------------------------------------------------------------------------
@@ -32,6 +32,7 @@ class DataSpliter:
         neg_data:tuple[ image_data_handler.ImageData ] = self._test_negative_data
         return pos_data, neg_data
 #======================================================================================
+
 class AnalysiserDataset(torch_data.Dataset):
     from . import torchvision, torch
 

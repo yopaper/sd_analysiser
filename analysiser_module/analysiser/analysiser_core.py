@@ -31,7 +31,7 @@ class AnalysiserCore:
     def get_model(self)->analysiser_model.ImageAnalysiser:
         from . import analysiser_model
         if( self.model == None ):
-            self.model = analysiser_model.ImageAnalysiser()
+            self.model = analysiser_model.ImageAnalysiser( self )
         return self.model
     #-----------------------------------------------------------------------
     def free_model(self)->None:

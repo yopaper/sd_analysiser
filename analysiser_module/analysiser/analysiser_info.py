@@ -27,9 +27,17 @@ class AnalysiserInfo:
         from .. import info_key
         return self.get_info_with_key( info_key.EPOCH_KEY )
     #-----------------------------------------------------------------------
+    def get_learning_rate(self)->float:
+        from .. import info_key
+        return self.get_info_with_key( info_key.LEARNING_RATE_KEY )
+    #-----------------------------------------------------------------------
     def get_batch_size(self)->int:
         from .. import info_key
         return self.get_info_with_key( info_key.BATCH_SIZE_KEY )
+    #-----------------------------------------------------------------------
+    def get_min_train_loss(self)->float:
+        from .. import info_key
+        return self.get_info_with_key( info_key.MIN_TRAIN_LOSS_KEY )
     #-----------------------------------------------------------------------
     def get_prompts(self)->tuple[ str ]:
         from .. import info_key

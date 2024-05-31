@@ -15,6 +15,7 @@ class AnalysiserTrainer:
         self.epoch = epoch
         self.batch_size = batch_size
         self.learn_rate = learn_rate
+        self.core.free_model()
         self.model = self.core.get_model()
         self.loss = torch.nn.BCELoss()
         self.train_dataloader = torch_data.DataLoader(
