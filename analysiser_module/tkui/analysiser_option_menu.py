@@ -78,20 +78,33 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         if( core==None ):
             messagebox.showerror("訓練錯誤", "未選擇模型或模型載入失敗!")
             return
-        epoch = 0
+        epoch:int = 0
         try:
             epoch += int(self.train_epoch_spinbox.get())
         except:
             messagebox.showerror("訓練錯誤", "Epoch異常!")
             return
+        learning_rate:float = 0
+        try:
+            learning_rate += float( self.learning_rate_var.get() )
+        except:
+            messagebox.showerror("訓練錯誤", "Learning Rate 異常!")
+            return
+        batch_size:int = 0
+        try:
+            batch_size += int( self.batch_size_var.get() )
+        except:
+            messagebox.showerror("訓練錯誤", "Batch Size 異常!")
+            return
+
         data_filter = self.data_filter_ui.current_filter
         print( "建立訓練器" )
         trainer = analysiser.analysiser_trainer.AnalysiserTrainer(
             analysiser_core = core,
             data_filter=data_filter,
             epoch = epoch,
-            learn_rate = 2e-4,
-            batch_size = 16,
+            learn_rate = learning_rate,
+            batch_size = batch_size,
         )
         trainer.start_train()
         core.info.load_info()

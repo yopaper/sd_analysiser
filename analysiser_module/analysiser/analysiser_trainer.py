@@ -17,12 +17,14 @@ class AnalysiserTrainer:
         self.learn_rate = learn_rate
         self.core.free_model()
         self.model = self.core.get_model()
-        self.loss = torch.nn.BCELoss()
+        self.loss = torch.nn.L1Loss()
+        # Data Loader
         self.train_dataloader = torch_data.DataLoader(
-            dataset=self.train_dataset, batch_size=self.batch_size, shuffle=True )
+            dataset=self.train_dataset, batch_size=self.batch_size, shuffle=True, drop_last=True )
         self.test_dataloader = torch_data.DataLoader(
-            dataset=self.test_dataset, batch_size=self.batch_size, shuffle=True )
+            dataset=self.test_dataset, batch_size=self.batch_size, shuffle=True, drop_last=True )
         self.optm = torch.optim.Adam( self.model.parameters(), lr = self.learn_rate )
+        # Loss Counter
         self._loss_sum = 0; self._batch_count = 0
         self._min_test_loss = -1; self._min_train_loss = -1
     #---------------------------------------------------------------------------
@@ -32,19 +34,23 @@ class AnalysiserTrainer:
     def get_info(self)->dict:
         from .. import info_key
         info = {}
-        info[ info_key.PROMPT_KEY ] = [ p.tag() for p in self.data_filter.tags ]
+        info[ info_key.PROMPT_KEY ] = [ p for p in self.data_filter.tags ]
         info[ info_key.EPOCH_KEY ] = self.epoch
         info[ info_key.LEARNING_RATE_KEY ] = self.learn_rate
         info[ info_key.BATCH_SIZE_KEY ] = self.batch_size
         info[ info_key.MIN_TRAIN_LOSS_KEY ] = self._min_train_loss
         info[ info_key.MIN_TEST_LOSS_KEY ] = self._min_test_loss
+        info[ info_key.TRAIN_DATA_NAME_LIST ] = [data.get_name() for data in self.train_dataset.get_relative_image_data()]
         return info
     #---------------------------------------------------------------------------
     def start_train(self)->None:
         from . import torch, analysiser_model
-        def train_batch( data:torch.Tensor, label:bool ):
-            output = self.model( data )
+        def train_batch( data:torch.Tensor, label:torch.Tensor ):
+            output:torch.Tensor = self.model( data )
             #gt = torch.ones_like( output ) * label
+            #print( output.size() )
+            output = output.mean( dim=(2, 3) )
+            #print( output.size(), label.size() )
             loss = self.loss( output, label )
             self.optm.zero_grad()
             loss.backward()
@@ -63,8 +69,9 @@ class AnalysiserTrainer:
                 self._min_train_loss = train_loss
             print( "Train Loss:", train_loss )
         #.......................................................................
-        def test_batch( data:torch.Tensor, label:bool ):
-            output = self.model( data )
+        def test_batch( data:torch.Tensor, label:torch.Tensor ):
+            output:torch.Tensor = self.model( data )
+            output = output.mean( dim=(2, 3) )
             #gt = torch.ones_like( output ) * label
             loss = self.loss( output, label )
             self._loss_sum += float( loss )

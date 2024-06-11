@@ -5,7 +5,6 @@ class ImageGeneratorMenu(basic_window.BasicWindow):
     DISABLED = 0; FIX = 1; ARRANGE = 2
 
     def __init__(self):
-        from .. import prompt_tag
         super().__init__()
         self.selected_prompt = None
         self.enable_fix_prompts = []
@@ -56,7 +55,6 @@ class ImageGeneratorMenu(basic_window.BasicWindow):
         self.window_center()
     #-------------------------------------------------------------------------------------
     def set_selection_to_list(self, target_list:list):
-        from .. import prompt_tag
         if( self.selected_prompt == None ):return
         if( self.selected_prompt in self.enable_arranged_prompts ):
             self.enable_arranged_prompts.remove( self.selected_prompt )
@@ -95,8 +93,8 @@ class ImageGeneratorMenu(basic_window.BasicWindow):
         self.arranged_prompt_listbox.delete(0, "end")
         self.demo_prompt_listbox.delete(0, "end")
 
-        for i in prompt_tag.tag_table:
-            current_tag = prompt_tag.tag_table[ i ].tag()
+        for i in prompt_tag.get_all_prompts():
+            current_tag = i
             if( current_tag in self.enable_fix_prompts ):
                 self.fix_prompt_listbox.insert( 0, current_tag )
             elif( current_tag in self.enable_arranged_prompts ):

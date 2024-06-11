@@ -59,6 +59,6 @@ class PromptManagerMenu(basic_window.BasicWindow):
     def update_prompt_list(self):
         from .. import prompt_tag
         self.prompt_listbox.delete(0, 'end')
-        for i in prompt_tag.tag_table:
+        for i in prompt_tag.get_all_prompts():
             self.prompt_listbox.insert(0, i)
 #=========================================================================================

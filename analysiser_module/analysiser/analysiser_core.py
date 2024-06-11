@@ -12,7 +12,6 @@ class AnalysiserCore:
         self.name = name
         self.file_handler = analysiser_file.AnalysiserFile( self )
         self.info = analysiser_info.AnalysiserInfo( self )
-        self.processor = analysiser_processor.AnalysiserProcessor( self )
         self.model = None
         analysiser_list.append( self )
         analysiser_name_table[ self.name ] = self
@@ -24,9 +23,6 @@ class AnalysiserCore:
         return self.file_handler
     #-----------------------------------------------------------------------
     def get_name(self)->str:return self.name
-    #-----------------------------------------------------------------------
-    def get_processor(self)->analysiser_processor.AnalysiserProcessor:
-        return self.processor
     #-----------------------------------------------------------------------
     def get_model(self)->analysiser_model.ImageAnalysiser:
         from . import analysiser_model

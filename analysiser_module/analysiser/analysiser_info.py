@@ -46,5 +46,27 @@ class AnalysiserInfo:
             return tuple( prompt_list )
         return None
     #-----------------------------------------------------------------------
+    def get_training_data_name_list(self)->tuple[ str ]:
+        from .. import info_key
+        data_list = self.get_info_with_key( info_key.TRAIN_DATA_NAME_LIST )
+        if( data_list != None ):return tuple( data_list )
+        return ()
+    #-----------------------------------------------------------------------
+    def trained_with_data(self, image_data)->bool:
+        from .. import image_data_handler
+        training_data_list = self.get_training_data_name_list()
+        image_data:image_data_handler.ImageData = image_data
+        return image_data.get_name() in training_data_list
+    #-----------------------------------------------------------------------
+    def compare_imagedata_prompt(self, image_data)->bool:
+        from .. import image_data_handler
+        image_data:image_data_handler.ImageData = image_data
+        core_prompts = self.get_prompts()
+        image_prompts = image_data.get_prompt()
+        for p in core_prompts:
+            if( p not in image_prompts ):
+                return False
+        return True
+    #-----------------------------------------------------------------------
     def have_info(self)->bool:return self._info_loaded
 #=============================================================================

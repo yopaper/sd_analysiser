@@ -22,6 +22,6 @@ analysiser_base_path = "./analysisers_data/"
 analysiser_list_file_path =  analysiser_base_path + "analysiser_list.txt"
 
 #------------------------------------------------------------------------------
-display_image_width = 300
-display_image_height = 300
+display_image_width = 200
+display_image_height = 200
 display_image_wh_rate = display_image_width/display_image_height

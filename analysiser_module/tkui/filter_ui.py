@@ -15,7 +15,7 @@ class PromptFilterUI:
         self.prompt_filter_listbox.grid( column=0, row=0, padx=6, pady=6 )
         self.prompt_filter_listbox.bind("<<ListboxSelect>>", self.on_listbox_selected)
         for prompt in prompt_tag.get_all_prompts():
-            self.prompt_filter_listbox.insert( "end", "－ "+prompt.tag() )
+            self.prompt_filter_listbox.insert( "end", "－ " + prompt )
 
         self.filter_mode_var = tk.StringVar( self.main_frame )
         self.filter_mode_frame = tk.LabelFrame( self.main_frame, text="篩選原則" )
@@ -37,7 +37,7 @@ class PromptFilterUI:
 
         self.on_click = None
     #---------------------------------------------------------------------------------
-    def get_enable_prompts(self)->tuple[prompt_tag.PromptTag]:
+    def get_enable_prompts(self)->tuple[ str ]:
         return tuple( self.enable_prompts )
     #---------------------------------------------------------------------------------
     def get_filter_mode(self)->str:
@@ -57,15 +57,15 @@ class PromptFilterUI:
         self.prompt_filter_listbox.delete( selection )
         if( prompt in self.enable_prompts ):
             self.enable_prompts.remove( prompt )
-            self.prompt_filter_listbox.insert( selection, "－ "+prompt.tag() )
+            self.prompt_filter_listbox.insert( selection, "－ " + prompt )
         else:
             self.enable_prompts.append( prompt )
-            self.prompt_filter_listbox.insert( selection, "● "+prompt.tag() )
+            self.prompt_filter_listbox.insert( selection, "● "+prompt )
         self.prompt_filter_listbox.delete("end")
         # 更新 label
         msg = ""
         for p in self.get_enable_prompts():
-            msg += "●" + p.tag() + " "
+            msg += "●" + p + " "
         self.enable_prompts_label.config( text=msg )
         if( self.on_click!=None ):
             self.on_click()

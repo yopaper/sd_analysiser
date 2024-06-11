@@ -20,6 +20,12 @@ class ImageData:
         self.prompt_table = None
         image_data_list.append( self )
     #-----------------------------------------------------------------------------
+    def for_test(self)->bool:
+        seed = self.get_seed()
+        return (seed == None or seed%2==0)
+    #-----------------------------------------------------------------------------
+    def get_name(self)->str:return self.file_name
+    #-----------------------------------------------------------------------------
     def get_checkpoint(self)->checkpoints_loader.SDCheckpoint:
         from . import checkpoints_loader
         info = self.get_info()
@@ -42,13 +48,13 @@ class ImageData:
                 self.image_info = json.load( file_reader )
         return self.image_info
     #-----------------------------------------------------------------------------
-    def get_pil_image(self)->Image:
+    def get_pil_image(self)->Image.Image:
         from . import Image
         if( self.pil_image==None ):
             self.pil_image = Image.open( self.image_file_path )
         return self.pil_image
     #-----------------------------------------------------------------------------
-    def get_tk_image(self)->ImageTk:
+    def get_tk_image(self)->ImageTk.PhotoImage:
         from . import ImageTk, config_data
         if( self.tk_image==None ):
             pil_image = self.get_pil_image()

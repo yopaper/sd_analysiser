@@ -2,7 +2,7 @@
 class ImageDataFilter:
     from . import prompt_tag, image_data_handler, checkpoints_loader
     AND_MODE = "and"; OR_MODE = "or"
-    def __init__(self, tags:tuple[prompt_tag.PromptTag], checkpoint:checkpoints_loader.SDCheckpoint, mode:str):
+    def __init__(self, tags:tuple[ str ], checkpoint:checkpoints_loader.SDCheckpoint, mode:str):
         from . import image_data_handler
         self.tags = tuple(tags)
         self.checkpoint = checkpoint
@@ -17,7 +17,7 @@ class ImageDataFilter:
             if( self.mode == ImageDataFilter.AND_MODE and len( self.tags )!=len( data.get_prompt() ) ):
                 pass_flag = False
             for tag in self.tags:
-                if( tag.tag() in data.get_prompt() ):
+                if( tag in data.get_prompt() ):
                     negative_flag = False
                 else:
                     pass_flag = False
