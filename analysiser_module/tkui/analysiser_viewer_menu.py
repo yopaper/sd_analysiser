@@ -2,7 +2,7 @@ from . import basic_window
 
 class ResultDisplayer:
     def __init__(self, master):
-        from . import tk, number_bar
+        from . import tk, number_bar, result_number_bar_group
         from .. import config_data
         self.main_frame = tk.LabelFrame( master=master, text="" )
 
@@ -11,16 +11,11 @@ class ResultDisplayer:
         self.mask_canvas = tk.Canvas( self.main_frame, width=config_data.display_image_width, height=config_data.display_image_height )
         self.mask_canvas.grid( column=1, row=0, padx=6, pady=6 )
 
-        self.right_ui_frame = tk.Frame( self.main_frame )
-        self.right_ui_frame.grid( column=2, row=0, padx=4, pady=4 )
+        self.bar_group = result_number_bar_group.ResultNumberBarGroup( self.main_frame, has_score_bar=True )
+        self.bar_group.get_frame().grid( column=2, row=0, padx=4, pady=4 )
 
-        self.score_bar = number_bar.NumberBar( self.right_ui_frame )
-        self.score_bar.grid( column=0, row=0 )
-        self.correct_bar = number_bar.NumberBar( self.right_ui_frame )
-        self.correct_bar.grid( column=0, row=1 )
-
-        self.info_label = tk.Label( self.right_ui_frame, text="", wraplength=150 )
-        self.info_label.grid( column=0, row=2 )
+        self.info_label = tk.Label( self.bar_group.get_frame(), text="", wraplength=150 )
+        self.info_label.pack( side="top", pady=5 )
     #----------------------------------------------------------------------------------------------------
     def grid(self, col:int, row:int):
         self.main_frame.grid( column=col, row=row, padx=8, pady=8 )
@@ -41,20 +36,7 @@ class ResultDisplayer:
         self.mask_canvas.create_image( (0, 0), anchor = "nw", image = result.get_predicted_mask() )
         self.main_frame.config( text=result.get_image_data().file_name )
         
-        self.score_bar.set_bar_length_rate( rate=result.get_score() )
-        score = round(result.get_score() * 1e5) / 1e3
-        self.score_bar.set_title( "分析結果" )
-        self.score_bar.set_number( score )
-
-        correct_rate = result.get_correct_rate()
-        bar_color:str
-        if( correct_rate >= 0.666 ):bar_color = "#22FF22"
-        elif( correct_rate >= 0.333 ):bar_color = "#AAAA33"
-        else:bar_color = "#FF2222"
-        self.correct_bar.set_bar_length_rate( rate=correct_rate, bar_color=bar_color )
-        correct_rate = round(correct_rate * 1e5) / 1e3
-        self.correct_bar.set_title("提示詞正確率")
-        self.correct_bar.set_number( correct_rate )
+        self.bar_group.load_result( result=result )
         
         info_msg = ""
         if( image.for_test() ):
@@ -65,7 +47,7 @@ class ResultDisplayer:
 
 class AnalysiserViewerMenu(basic_window.BasicWindow):
     def __init__(self):
-        from . import analysiser_selection_combobox, scroll_frame, number_bar, page_ui, tk
+        from . import analysiser_selection_combobox, result_number_bar_group, scroll_frame, number_bar, page_ui, tk
         from .. import analysiser
 
         self._current_processor:analysiser.analysiser_processor.AnalysiserProcessor = None
@@ -102,6 +84,9 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.without_training_data_button.grid( column=0, row=0, padx=5, pady=5 )
         
         # 整體分析結果
+        self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.left_ui_frame, title="整體分析結果" )
+        self.main_result_bar_group.get_frame().grid( column=0, row=3, padx=4, pady=4 )
+        """
         self.main_result_frame = tk.LabelFrame( self.left_ui_frame, text="整體分析結果" )
         self.main_result_frame.grid( column=0, row=3, padx=5, pady=5 )
         self.correct_rate_bar = number_bar.NumberBar( self.main_result_frame, width=130 )
@@ -119,7 +104,7 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.lack_rate_bar.set_title( title="平均提示詞缺失率" )
         self.lack_rate_bar.set_bar_length_rate(rate=0)
         self.lack_rate_bar.set_number( "未分析" )
-
+        """
         # 結果顯示群組
         self.displayer_width = 2; self.displayer_height = 3
         self.displayer_number = self.displayer_width * self.displayer_height
@@ -159,24 +144,7 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self._current_processor.start()
         # 更新UI
         self._update_displayer_ui()
-        correct_rate = self._current_processor.get_avg_correct_rate()
-        bar_color:str
-        if( correct_rate >= 0.666 ):bar_color = "#11FF11"
-        elif( correct_rate >= 0.333 ):bar_color = "#AAAA22"
-        else:bar_color = "#FF1111"
-        self.correct_rate_bar.set_bar_length_rate( rate=correct_rate, bar_color=bar_color )
-        correct_rate = round( correct_rate*1e5 )/1e3
-        self.correct_rate_bar.set_number( correct_rate )
-
-        redundant_rate = self._current_processor.get_avg_redundant_rate()
-        self.redundant_rate_bar.set_bar_length_rate( rate=redundant_rate )
-        redundant_rate = round( redundant_rate*1e5 ) / 1e3
-        self.redundant_rate_bar.set_number( redundant_rate )
-
-        lack_rate = self._current_processor.get_avg_lack_rate()
-        self.lack_rate_bar.set_bar_length_rate( rate=lack_rate )
-        lack_rate = round( lack_rate*1e5 ) / 1e3
-        self.lack_rate_bar.set_number( lack_rate )
+        self.main_result_bar_group.load_unifier( self._current_processor.get_main_unifier() )
     #---------------------------------------------------------------------------------------------------
     def _update_info_label(self, evnet=None)->None:
         core = self.analysiser_selecter.get_selected_core()

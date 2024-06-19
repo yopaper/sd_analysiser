@@ -7,6 +7,7 @@ from .. import messagebox
 from . import basic_window
 from . import filter_ui
 from . import number_bar
+from . import result_number_bar_group
 from . import scroll_frame
 from . import main_menu
 from . import image_viewer_menu
