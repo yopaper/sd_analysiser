@@ -51,7 +51,7 @@ def check_sd_enable(wait_sec:float=1.2)->bool:
 def open_sd():
     def run_command():
         print("Stable Diffusion not working, activate it...")
-        os.system("python ../sd_web/webui/launch.py --api")
+        os.system( "python {0} --api".format( config_data.sd_launch_path ) )
         print("Stable Diffusion End")
     #...........................................................
     if( check_sd_enable() ):return

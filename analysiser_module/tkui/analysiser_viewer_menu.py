@@ -119,18 +119,7 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.lack_rate_bar.set_title( title="平均提示詞缺失率" )
         self.lack_rate_bar.set_bar_length_rate(rate=0)
         self.lack_rate_bar.set_number( "未分析" )
-        # 測試
-        self.mf = tk.Frame( self.left_ui_frame )
-        self.mf.grid( column=0, row=4 )
-        self.c = tk.Canvas( self.mf, width=200, height=200 )
-        self.c.pack( side="left" )
-        self.sb = tk.Scrollbar( self.mf )
-        self.sb.pack( side="right", fill="y" )
-        self.f = tk.Frame( self.c )
-        self.c.create_window( (0, 0), window=self.f, anchor="nw" )
-        for i in range(20):
-            tk.Label( self.f, text="Label:{0}".format( i ) ).grid( column=0, row=i )
-        self.c.yview_moveto(0.2)
+
         # 結果顯示群組
         self.displayer_width = 2; self.displayer_height = 3
         self.displayer_number = self.displayer_width * self.displayer_height

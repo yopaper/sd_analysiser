@@ -6,7 +6,7 @@ sd_checkpoints_url = sd_url + "/sdapi/v1/sd-models"
 sd_current_checkpoint_url = sd_url + "/sdapi/v1/options"
 
 # Stable Diffusion 檔案路徑
-sd_base_path = "../sd_web/"
+sd_base_path = "../sd.webui/"
 sd_web_path = sd_base_path + "webui/"
 sd_launch_path = sd_web_path + "launch.py"
 
