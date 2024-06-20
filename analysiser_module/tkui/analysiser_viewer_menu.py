@@ -48,17 +48,37 @@ class ResultDisplayer:
 class AnalysiserViewerMenu(basic_window.BasicWindow):
     def __init__(self):
         from . import analysiser_selection_combobox, result_number_bar_group, scroll_frame, number_bar, page_ui, tk
-        from .. import analysiser
+        from .. import analysiser, prompt_tag
 
         self._current_processor:analysiser.analysiser_processor.AnalysiserProcessor = None
 
         super().__init__()
         self.window.title("使用模型")
-
-        self.left_ui_frame = tk.Frame( self.window )
-        self.left_ui_frame.grid( column=0, row=0, padx=6, pady=6 )
+        self.option_ui_frame = tk.Frame( self.window )
+        self.option_ui_frame.grid( column=2, row=0, padx=6, pady=6 )
+        frame_height = 750
+        # 提示詞數量分析 UI
+        self.prompt_number_ui_frame = scroll_frame.ScrollFrame( self.window, text="提示詞數量影響性", width=275, height=frame_height )
+        self.prompt_number_ui_frame.grid( column=0, row=0, padx=6, pady=6 )
+        self.prompt_number_bar_group_table:dict[ int, result_number_bar_group.ResultNumberBarGroup ] = {}
+        for i in range(1, 25):
+            bar_group = result_number_bar_group.ResultNumberBarGroup(
+                self.prompt_number_ui_frame.get_frame(), title="提示詞數量:{0} 的表現數據".format(i) )
+            bar_group.get_frame().pack(side="top", padx=10, pady=4)
+            self.prompt_number_bar_group_table[ i ] = bar_group
+        self.prompt_number_ui_frame.update_scrollregion()
+        # 提示詞影響分析 UI
+        self.prompt_group_ui_frame = scroll_frame.ScrollFrame( self.window, text="提示詞彼此影響性", width=275, height=frame_height )
+        self.prompt_group_ui_frame.grid( column=1, row=0, padx=6, pady=6 )
+        self.prompt_group_bar_group_table:dict[ str, result_number_bar_group.ResultNumberBarGroup ] = {}
+        for i in prompt_tag.get_all_prompts():
+            bar_group = result_number_bar_group.ResultNumberBarGroup(
+                self.prompt_group_ui_frame.get_frame(), title="提示詞 \"{0}\" 存在的影響性".format(i) )
+            bar_group.get_frame().pack(side="top", padx=10, pady=4)
+            self.prompt_group_bar_group_table[i] = bar_group
+        self.prompt_group_ui_frame.update_scrollregion()
         # 模型選擇群組
-        self.analysiser_selection_frame = tk.LabelFrame( self.left_ui_frame, text="選擇模型" )
+        self.analysiser_selection_frame = tk.LabelFrame( self.option_ui_frame, text="選擇模型" )
         self.analysiser_selection_frame.grid( column=0, row=0, padx=5, pady=5 )
 
         self.analysiser_selecter = analysiser_selection_combobox.AnalysiserSelectionCombobox(self.analysiser_selection_frame)
@@ -71,12 +91,12 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.start_process_button = tk.Button( self.analysiser_selection_frame, text="開始分析", command=self._click_to_start_process )
         self.start_process_button.grid( column=1, row=0, padx=5, pady=5 )
         # 頁面群組
-        self.page_ui = page_ui.PageUI( self.left_ui_frame )
+        self.page_ui = page_ui.PageUI( self.option_ui_frame )
         self.page_ui.main_frame.grid( column=0, row=1, padx=5, pady=5 )
         self.page_ui.set_max_page_getter( self.get_max_page )
         self.page_ui.set_page_change_event( self._update_displayer_ui )
         # 篩選群組
-        self.result_filter_frame = tk.LabelFrame( self.left_ui_frame, text="資料篩選" )
+        self.result_filter_frame = tk.LabelFrame( self.option_ui_frame, text="資料篩選" )
         self.result_filter_frame.grid( column=0, row=2, padx=5, pady=5 )
         self.without_training_data_var = tk.BooleanVar( self.window )
         self.without_training_data_var.set(True)
@@ -84,41 +104,25 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.without_training_data_button.grid( column=0, row=0, padx=5, pady=5 )
         
         # 整體分析結果
-        self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.left_ui_frame, title="整體分析結果" )
+        self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.option_ui_frame, title="整體分析結果" )
         self.main_result_bar_group.get_frame().grid( column=0, row=3, padx=4, pady=4 )
-        """
-        self.main_result_frame = tk.LabelFrame( self.left_ui_frame, text="整體分析結果" )
-        self.main_result_frame.grid( column=0, row=3, padx=5, pady=5 )
-        self.correct_rate_bar = number_bar.NumberBar( self.main_result_frame, width=130 )
-        self.correct_rate_bar.grid( column=0, row=0 )
-        self.correct_rate_bar.set_title( "平均提示詞正確率" )
-        self.correct_rate_bar.set_bar_length_rate(rate=0)
-        self.correct_rate_bar.set_number( "未分析" )
-        self.redundant_rate_bar = number_bar.NumberBar( self.main_result_frame, width=130 )
-        self.redundant_rate_bar.grid( column=0, row=1 )
-        self.redundant_rate_bar.set_title( title="平均提示詞多餘率" )
-        self.redundant_rate_bar.set_bar_length_rate(rate=0)
-        self.redundant_rate_bar.set_number( "未分析" )
-        self.lack_rate_bar = number_bar.NumberBar( self.main_result_frame, width=130 )
-        self.lack_rate_bar.grid( column=0, row=2 )
-        self.lack_rate_bar.set_title( title="平均提示詞缺失率" )
-        self.lack_rate_bar.set_bar_length_rate(rate=0)
-        self.lack_rate_bar.set_number( "未分析" )
-        """
         # 結果顯示群組
-        self.displayer_width = 2; self.displayer_height = 3
-        self.displayer_number = self.displayer_width * self.displayer_height
-        self.result_display_group = tk.LabelFrame( self.window, text = "圖片個別分析" )
-        self.result_display_group.grid( column=1, row=0, padx=8, pady=8 )
+        self.displayer_number = 100
+        self.result_display_frame = scroll_frame.ScrollFrame( self.window, text = "圖片個別分析", width=800, height=frame_height )
+        self.result_display_frame.grid( column=3, row=0, padx=6, pady=6 )
         self.displayer_list:list[ResultDisplayer] = []
-        for y in range( self.displayer_height ):
-            for x in range( self.displayer_width ):
-                displayer = ResultDisplayer( self.result_display_group )
-                self.displayer_list.append( displayer )
-                displayer.grid( col=x, row=y )
-
+        for i in range( self.displayer_number ):
+            displayer = ResultDisplayer( self.result_display_frame.get_frame() )
+            self.displayer_list.append( displayer )
+            displayer.grid(col=0, row=i)
+        self.result_display_frame.update_scrollregion()
         self.window_center()
         self._update_info_label()
+    #---------------------------------------------------------------------------------------------------
+    def close(self):
+        from . import prompt_number_chart_menu
+        super().close()
+        prompt_number_chart_menu.close_instance()
     #---------------------------------------------------------------------------------------------------
     def get_max_page(self)->int:
         from math import ceil
@@ -127,7 +131,7 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         return ceil( result_number / self.displayer_number )
     #---------------------------------------------------------------------------------------------------
     def _click_to_start_process(self)->None:
-        from . import messagebox
+        from . import messagebox, result_number_bar_group, prompt_number_chart_menu
         from .. import analysiser
         core = self.analysiser_selecter.get_selected_core()
         if( core == None ):
@@ -145,6 +149,23 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         # 更新UI
         self._update_displayer_ui()
         self.main_result_bar_group.load_unifier( self._current_processor.get_main_unifier() )
+        number_key = self._current_processor.get_prompt_number_table_key()
+        for i in self.prompt_number_bar_group_table:
+            self.prompt_number_bar_group_table[i].reset()
+        for i in number_key:
+            if( i not in self.prompt_number_bar_group_table ):continue
+            self.prompt_number_bar_group_table[i].load_unifier(
+                self._current_processor.get_unifiier_with_prompt_number( i ) )
+        for i in self.prompt_group_bar_group_table:
+            unifier = self._current_processor.get_unifier_with_prompt_group( i )
+            bar_group:result_number_bar_group.ResultNumberBarGroup = self.prompt_group_bar_group_table[i]
+            if( unifier != None ):
+                bar_group.load_unifier(unifier)
+            else:bar_group.reset()
+        # 顯示圖表
+        number_chart_menu = prompt_number_chart_menu.PromptNumberChartMenu()
+        number_chart_menu.load_processor( self._current_processor )
+        number_chart_menu.open()
     #---------------------------------------------------------------------------------------------------
     def _update_info_label(self, evnet=None)->None:
         core = self.analysiser_selecter.get_selected_core()
@@ -173,4 +194,5 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         #................................................................................................
         for i in range( self.displayer_number ):
             single_displayer( i )
+        self.result_display_frame.update_scrollregion()
 #========================================================================================================

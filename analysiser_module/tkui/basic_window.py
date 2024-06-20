@@ -16,7 +16,7 @@ class BasicWindow:
         main_menu.get_instance().enable_buttons()
         self.window.destroy()
     #---------------------------------------------------------
-    def window_center(self, delay_time:int=10):
+    def window_center(self, delay_time:int=100):
         def delay_function():
             screen_width = self.window.winfo_screenwidth()
             screen_height = self.window.winfo_screenheight()

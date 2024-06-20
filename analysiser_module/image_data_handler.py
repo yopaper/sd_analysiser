@@ -71,7 +71,7 @@ class ImageData:
         return self.tk_image
     #-----------------------------------------------------------------------------
     def get_tensor_data(self)->analysiser.torch.Tensor:
-        return ImageData.transform( self.get_pil_image() )
+        return ImageData.transform( self.get_pil_image() ).cuda()
     #-----------------------------------------------------------------------------
     def get_seed(self)->int:
         from . import info_key

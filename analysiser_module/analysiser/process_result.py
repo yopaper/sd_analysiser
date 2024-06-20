@@ -22,15 +22,13 @@ class ProcessResult:
 
         if( self._image_positive ):
             self._correct_rate = self._predicted_score
-            self._redundant_rate = 0
+            self._redundant_rate = None
             self._lack_rate = 1 - self._predicted_score
         else:
             self._correct_rate = 1 - self._predicted_score
             self._redundant_rate = self._predicted_score
-            self._lack_rate = 0
-
-        
-
+            self._lack_rate = None
+            
         # 虛擬特徵圖
         max_value = model_out.max(); min_value = model_out.min()
         value_delta = max_value - min_value

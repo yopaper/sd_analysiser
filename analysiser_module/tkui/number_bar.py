@@ -16,7 +16,7 @@ class NumberBar:
     #--------------------------------------------------------------------------------------
     def get_frame(self):return self._main_frame
     #--------------------------------------------------------------------------------------
-    def set_bar_length_rate(self, rate:float, bar_color:str="#AAAAAA", bg_color:str="#333333"):
+    def set_bar_length_rate(self, rate:float, bar_color:str="#AAAAAA", bg_color:str="#565656"):
         rate = min( rate, 1 )
         rate = max( rate, 0 )
         #assert rate>=0 and rate <=1, "rate 必須落在 0~1 之間"

@@ -4,23 +4,37 @@ class ResultNumberBarGroup:
         from . import tk, number_bar
         self._main_frame = tk.LabelFrame( master=master, text=title )
         self._has_score_bar = has_score_bar
+        bar_pady = 1
         self._score_bar : number_bar.NumberBar = None
         if( has_score_bar ):
             self._score_bar = number_bar.NumberBar( self._main_frame )
             self._score_bar.set_title("信心分數")
-            self._score_bar.get_frame().pack( side="top", padx=3, pady=3 )
+            self._score_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
         self._correct_bar = number_bar.NumberBar( self._main_frame )
-        self._correct_bar.get_frame().pack( side="top", padx=3, pady=3 )
+        self._correct_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
         self._correct_bar.set_title("提示詞正確率")
         self._redundant_bar = number_bar.NumberBar( self._main_frame )
-        self._redundant_bar.get_frame().pack( side="top", padx=3, pady=3 )
+        self._redundant_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
         self._redundant_bar.set_title("提示詞多餘率")
         self._lack_bar = number_bar.NumberBar( self._main_frame )
-        self._lack_bar.get_frame().pack( side="top", padx=3, pady=3 )
+        self._lack_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
         self._lack_bar.set_title("提示詞缺失率")
+        self.reset()
     #-------------------------------------------------------------------------
     def get_frame(self):return self._main_frame
     #-------------------------------------------------------------------------
+    def reset(self):
+        from . import number_bar
+        def reset_bar( bar:number_bar.NumberBar ):
+            bar.set_bar_length_rate(0, "#666666", "#666666")
+            bar.set_number( "無數據" )
+        #...................................................................
+        if( self._has_score_bar ):
+            reset_bar( self._score_bar )
+        reset_bar( self._correct_bar )
+        reset_bar( self._redundant_bar )
+        reset_bar( self._lack_bar )
+    #------------------------------------------------------------------------------------------------
     def set_bar_value(self, score:float, correct_rate:float, redundant_rate:float, lack_rate:float):
         def to_percent(value)->str:
             value = round( value*1e5 )/1e3
@@ -28,8 +42,11 @@ class ResultNumberBarGroup:
         #..............................................................
         def get_bar_color(value)->str:
             if( value >= 0.8 ):return "#44FF44"
+            elif( value >= 0.7 ):return "#66CC44"
             elif( value >= 0.6 ):return "#77AA44"
+            elif( value >= 0.5 ):return "#998844"
             elif( value >= 0.4 ):return "#AA7744"
+            elif( value >= 0.3 ):return "#CC5544"
             elif( value >= 0.2 ):return "#FF4444"
             else:return "#FF0000"
         #...............................................................
@@ -42,17 +59,25 @@ class ResultNumberBarGroup:
         self._correct_bar.set_bar_length_rate( rate=correct_rate, bar_color=bar_color )
         self._correct_bar.set_number( to_percent( correct_rate ) )
         # Redundant Rate
-        bar_color = get_bar_color( 1-redundant_rate )
-        self._redundant_bar.set_bar_length_rate( rate=redundant_rate, bar_color=bar_color )
-        self._redundant_bar.set_number( to_percent( redundant_rate ) )
+        if( redundant_rate != None ):
+            bar_color = get_bar_color( 1-redundant_rate )
+            self._redundant_bar.set_bar_length_rate( rate=redundant_rate, bar_color=bar_color )
+            self._redundant_bar.set_number( to_percent( redundant_rate ) )
+        else:
+            self._redundant_bar.set_bar_length_rate(rate=1, bar_color="#FFFFFF", bg_color="#111111")
+            self._redundant_bar.set_number("None")
         # Lack Rate
-        bar_color = get_bar_color( 1-lack_rate )
-        self._lack_bar.set_bar_length_rate( rate=lack_rate, bar_color=bar_color )
-        self._lack_bar.set_number( to_percent( lack_rate ) )
+        if( lack_rate != None ):
+            bar_color = get_bar_color( 1-lack_rate )
+            self._lack_bar.set_bar_length_rate( rate=lack_rate, bar_color=bar_color )
+            self._lack_bar.set_number( to_percent( lack_rate ) )
+        else:
+            self._lack_bar.set_bar_length_rate( rate=1, bar_color="#FFFFFF", bg_color="#111111" )
+            self._lack_bar.set_number("None")
     #------------------------------------------------------------------------------------------------
     def load_unifier(self, unifier):
         from .. import analysiser
-        unifier:analysiser.analysiser_processor.ResultValueUnifier = unifier
+        unifier:analysiser.result_value_unifier.ResultValueUnifier = unifier
         self.set_bar_value(
             score=0,
             correct_rate=unifier.get_avg_correct_rate(),

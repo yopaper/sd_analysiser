@@ -14,4 +14,5 @@ from . import analysiser_file
 from . import analysiser_core
 from . import analysiser_trainer
 from . import analysiser_processor
+from . import result_value_unifier
 from . import process_result

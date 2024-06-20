@@ -3,20 +3,23 @@ class AnalysiserTrainer:
     from . import analysiser_dataset, analysiser_core
     def __init__(self,
         analysiser_core: analysiser_core.AnalysiserCore,
-        data_filter, epoch:int, learn_rate:float, batch_size:int
+        data_filter, epoch:int, learn_rate:float, batch_size:int,
+        max_train_data_number:int=1024, max_test_data_number:int=256
     ) -> None:
         from . import torch, torch_data, analysiser_dataset
         from .. import image_data_filter
         self.core = analysiser_core
         self.data_filter:image_data_filter.ImageDataFilter = data_filter
-        data_spliter = analysiser_dataset.DataSpliter( self.data_filter )
+        data_spliter = analysiser_dataset.DataSpliter( self.data_filter,
+                                                      max_train_data_number=max_train_data_number,
+                                                      max_test_data_number=max_test_data_number )
         self.train_dataset = analysiser_dataset.AnalysiserDataset( *data_spliter.get_train_data() )
         self.test_dataset = analysiser_dataset.AnalysiserDataset( *data_spliter.get_test_data() )
         self.epoch = epoch
         self.batch_size = batch_size
         self.learn_rate = learn_rate
         self.core.free_model()
-        self.model = self.core.get_model()
+        self.model = self.core.get_model().cuda()
         self.loss = torch.nn.L1Loss()
         # Data Loader
         self.train_dataloader = torch_data.DataLoader(

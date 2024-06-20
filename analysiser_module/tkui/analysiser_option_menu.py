@@ -109,6 +109,7 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         trainer.start_train()
         core.info.load_info()
         self._update_ui()
+        analysiser.analysiser_core.write_to_file()
     #---------------------------------------------------------------------------
     def _update_ui(self, event=None)->None:
         core = self.get_selected_core()
@@ -127,6 +128,8 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         info_msg += "訓練 Epoch: {0}\n".format(info.get_epoch())
         info_msg += "訓練 Batch Size: {0}\n".format( info.get_batch_size() )
         info_msg += "訓練 Learning Rate: {0}\n".format( info.get_learning_rate() )
+        info_msg += "實際訓練資料數量: {0}\n".format( len( info.get_training_data_name_list() ) )
+        info_msg += "最低訓練損失: {0}\n".format( float( info.get_min_train_loss() ) )
         self.info_label.config( text=info_msg )
     #---------------------------------------------------------------------------
     def _update_data_number_ui(self):
