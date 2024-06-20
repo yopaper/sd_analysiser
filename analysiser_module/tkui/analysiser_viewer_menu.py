@@ -1,29 +1,25 @@
-from . import basic_window
+from . import tk, basic_window
 
-class ResultDisplayer:
+class ResultDisplayer(tk.LabelFrame):
     def __init__(self, master):
         from . import tk, number_bar, result_number_bar_group
         from .. import config_data
-        self.main_frame = tk.LabelFrame( master=master, text="" )
+        super().__init__(master=master, text="")
 
-        self.image_canvas = tk.Canvas( self.main_frame, width=config_data.display_image_width, height=config_data.display_image_height )
+        self.image_canvas = tk.Canvas( self, width=config_data.display_image_width, height=config_data.display_image_height )
         self.image_canvas.grid( column=0, row=0, padx=6, pady=6 )
-        self.mask_canvas = tk.Canvas( self.main_frame, width=config_data.display_image_width, height=config_data.display_image_height )
+        self.mask_canvas = tk.Canvas( self, width=config_data.display_image_width, height=config_data.display_image_height )
         self.mask_canvas.grid( column=1, row=0, padx=6, pady=6 )
 
-        self.bar_group = result_number_bar_group.ResultNumberBarGroup( self.main_frame, has_score_bar=True )
+        self.bar_group = result_number_bar_group.ResultNumberBarGroup( self, has_score_bar=True )
         self.bar_group.get_frame().grid( column=2, row=0, padx=4, pady=4 )
 
         self.info_label = tk.Label( self.bar_group.get_frame(), text="", wraplength=150 )
         self.info_label.pack( side="top", pady=5 )
     #----------------------------------------------------------------------------------------------------
-    def grid(self, col:int, row:int):
-        self.main_frame.grid( column=col, row=row, padx=8, pady=8 )
-    #----------------------------------------------------------------------------------------------------
     def _reset_displayer(self):
         self.image_canvas.delete("all")
         self.mask_canvas.delete("all")
-        self.main_frame.config( text="" )
         self.info_label.config( text="" )
     #----------------------------------------------------------------------------------------------------
     def load_result(self, result):
@@ -34,7 +30,7 @@ class ResultDisplayer:
         image = result.get_image_data()
         self.image_canvas.create_image( (0, 0), anchor = "nw", image = result.get_image_data().get_tk_image() )
         self.mask_canvas.create_image( (0, 0), anchor = "nw", image = result.get_predicted_mask() )
-        self.main_frame.config( text=result.get_image_data().file_name )
+        self.config( text=result.get_image_data().file_name )
         
         self.bar_group.load_result( result=result )
         
@@ -44,10 +40,27 @@ class ResultDisplayer:
         info_msg += "提示詞: {0}\n".format( image.get_prompt() )
         self.info_label.config( text=info_msg )
 #========================================================================================================
-
+class DisplayerFrame( tk.Frame ):
+    def __init__(self, master):
+        super().__init__( master=master )
+        tk.Label( self, text="個別圖片結果" ).pack(side="top")
+        self._displayers_list:list[ ResultDisplayer ] = []
+    #--------------------------------------------------------
+    def load_processor( self, processor ):
+        from .. import analysiser
+        for displayer in self._displayers_list:
+            displayer.destroy()
+        self._displayers_list.clear()
+        processor:analysiser.analysiser_processor.AnalysiserProcessor = processor
+        results = processor.get_results()
+        for result in results:
+            displayer = ResultDisplayer( self )
+            displayer.load_result( result )
+            displayer.pack( side="top", padx=10, pady=20 )
+#========================================================================================================
 class AnalysiserViewerMenu(basic_window.BasicWindow):
     def __init__(self):
-        from . import analysiser_selection_combobox, result_number_bar_group, scroll_frame, number_bar, page_ui, tk
+        from . import analysiser_selection_combobox, result_number_bar_group, scroll_frame, prompt_map_chart_frame, prompt_number_chart_frame
         from .. import analysiser, prompt_tag
 
         self._current_processor:analysiser.analysiser_processor.AnalysiserProcessor = None
@@ -55,11 +68,11 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         super().__init__()
         self.window.title("使用模型")
         self.option_ui_frame = tk.Frame( self.window )
-        self.option_ui_frame.grid( column=2, row=0, padx=6, pady=6 )
+        self.option_ui_frame.grid( column=0, row=0, padx=6, pady=6 )
         frame_height = 750
         # 提示詞數量分析 UI
         self.prompt_number_ui_frame = scroll_frame.ScrollFrame( self.window, text="提示詞數量影響性", width=275, height=frame_height )
-        self.prompt_number_ui_frame.grid( column=0, row=0, padx=6, pady=6 )
+        self.prompt_number_ui_frame.grid( column=2, row=0, padx=6, pady=6 )
         self.prompt_number_bar_group_table:dict[ int, result_number_bar_group.ResultNumberBarGroup ] = {}
         for i in range(1, 25):
             bar_group = result_number_bar_group.ResultNumberBarGroup(
@@ -90,14 +103,9 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
 
         self.start_process_button = tk.Button( self.analysiser_selection_frame, text="開始分析", command=self._click_to_start_process )
         self.start_process_button.grid( column=1, row=0, padx=5, pady=5 )
-        # 頁面群組
-        self.page_ui = page_ui.PageUI( self.option_ui_frame )
-        self.page_ui.main_frame.grid( column=0, row=1, padx=5, pady=5 )
-        self.page_ui.set_max_page_getter( self.get_max_page )
-        self.page_ui.set_page_change_event( self._update_displayer_ui )
         # 篩選群組
         self.result_filter_frame = tk.LabelFrame( self.option_ui_frame, text="資料篩選" )
-        self.result_filter_frame.grid( column=0, row=2, padx=5, pady=5 )
+        self.result_filter_frame.grid( column=0, row=2, padx=5, pady=5, sticky="we" )
         self.without_training_data_var = tk.BooleanVar( self.window )
         self.without_training_data_var.set(True)
         self.without_training_data_button = tk.Checkbutton( self.result_filter_frame, text="排除訓練資料", variable=self.without_training_data_var )
@@ -106,32 +114,45 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         # 整體分析結果
         self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.option_ui_frame, title="整體分析結果" )
         self.main_result_bar_group.get_frame().grid( column=0, row=3, padx=4, pady=4 )
-        # 結果顯示群組
-        self.displayer_number = 100
-        self.result_display_frame = scroll_frame.ScrollFrame( self.window, text = "圖片個別分析", width=800, height=frame_height )
-        self.result_display_frame.grid( column=3, row=0, padx=6, pady=6 )
-        self.displayer_list:list[ResultDisplayer] = []
-        for i in range( self.displayer_number ):
-            displayer = ResultDisplayer( self.result_display_frame.get_frame() )
-            self.displayer_list.append( displayer )
-            displayer.grid(col=0, row=i)
-        self.result_display_frame.update_scrollregion()
+
+        # 右側顯示框
+        self.right_frame = scroll_frame.ScrollFrame( self.window, text = "", width=700, height=frame_height )
+        self.right_frame.grid( column=3, row=0, padx=6, pady=6 )
+        # 個別結果顯示
+        self.displayer_frame = DisplayerFrame( self.right_frame.get_frame() )
+        # 提示詞數量關係表
+        self.prompt_number_chart = prompt_number_chart_frame.PromptNumberChartFrame( self.right_frame.get_frame() )
+        # 提示詞彼此影響
+        self.prompt_map_chart = prompt_map_chart_frame.PromptMapChartFrame( self.right_frame.get_frame() )
+        # 右側選項框
+        self.right_option_frame = tk.LabelFrame( self.window )
+        self.right_option_frame.grid( column=4, row=0, padx=10, pady=10, sticky="n" )
+        tk.Button( self.right_option_frame, text="個別圖片結果", command=self._show_displayer_frame ).pack(side="top", padx=8, pady=8)
+        tk.Button( self.right_option_frame, text="提示詞數量關係", command=self._show_prompt_number_chart ).pack(side="top", padx=8, pady=8)
+        tk.Button( self.right_option_frame, text="提示詞彼此影響", command=self._show_prompt_map_chart ).pack(side="top", padx=8, pady=8)
         self.window_center()
         self._update_info_label()
     #---------------------------------------------------------------------------------------------------
-    def close(self):
-        from . import prompt_number_chart_menu
-        super().close()
-        prompt_number_chart_menu.close_instance()
+    def _show_displayer_frame(self):
+        self.prompt_number_chart.pack_forget()
+        self.displayer_frame.pack()
+        self.prompt_map_chart.pack_forget()
+        self.right_frame.update_scrollregion()
     #---------------------------------------------------------------------------------------------------
-    def get_max_page(self)->int:
-        from math import ceil
-        if( self._current_processor==None ):return 1
-        result_number = len( self._current_processor.get_results() )
-        return ceil( result_number / self.displayer_number )
+    def _show_prompt_number_chart(self):
+        self.prompt_number_chart.pack()
+        self.displayer_frame.pack_forget()
+        self.prompt_map_chart.pack_forget()
+        self.right_frame.update_scrollregion()
+    #---------------------------------------------------------------------------------------------------
+    def _show_prompt_map_chart(self):
+        self.prompt_number_chart.pack_forget()
+        self.displayer_frame.pack_forget()
+        self.prompt_map_chart.pack()
+        self.right_frame.update_scrollregion()
     #---------------------------------------------------------------------------------------------------
     def _click_to_start_process(self)->None:
-        from . import messagebox, result_number_bar_group, prompt_number_chart_menu
+        from . import messagebox, result_number_bar_group
         from .. import analysiser
         core = self.analysiser_selecter.get_selected_core()
         if( core == None ):
@@ -147,7 +168,6 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
             core=core, without_training_data=self.without_training_data_var.get() )
         self._current_processor.start()
         # 更新UI
-        self._update_displayer_ui()
         self.main_result_bar_group.load_unifier( self._current_processor.get_main_unifier() )
         number_key = self._current_processor.get_prompt_number_table_key()
         for i in self.prompt_number_bar_group_table:
@@ -162,10 +182,10 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
             if( unifier != None ):
                 bar_group.load_unifier(unifier)
             else:bar_group.reset()
-        # 顯示圖表
-        number_chart_menu = prompt_number_chart_menu.PromptNumberChartMenu()
-        number_chart_menu.load_processor( self._current_processor )
-        number_chart_menu.open()
+        self.displayer_frame.load_processor( self._current_processor )
+        self.prompt_number_chart.load_processor( self._current_processor )
+        self.prompt_map_chart.load_processor( self._current_processor )
+        self.right_frame.update_scrollregion()
     #---------------------------------------------------------------------------------------------------
     def _update_info_label(self, evnet=None)->None:
         core = self.analysiser_selecter.get_selected_core()
@@ -179,7 +199,7 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
             return
         info_msg = ""
         for p in info.get_prompts():
-            info_msg += p + ", "
+            info_msg += " [{0}] ".format(p)
         self.selected_core_info_label.config( text=info_msg )
     #----------------------------------------------------------------------------------------------------
     def _update_displayer_ui(self):
@@ -194,5 +214,5 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         #................................................................................................
         for i in range( self.displayer_number ):
             single_displayer( i )
-        self.result_display_frame.update_scrollregion()
+        self.right_frame.update_scrollregion()
 #========================================================================================================

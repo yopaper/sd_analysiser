@@ -8,8 +8,11 @@ class BasicWindow:
     #---------------------------------------------------------
     def open(self):
         from . import main_menu
+        #from .. import Thread
         main_menu.get_instance().disable_buttons()
         self.window.mainloop()
+        #t = Thread( target=self.window.mainloop )
+        #t.start()
     #---------------------------------------------------------
     def close(self):
         from . import main_menu

@@ -42,7 +42,7 @@ class AnalysiserProcessor:
         #...............................................................
         image_datas = image_data_handler.get_image_datas()
         for img in image_datas:
-            ##if( random()<=0.965 ):continue
+            if( random()<=0.965 ):continue
             process_image_data( img )
     #-------------------------------------------------------------------
     def get_main_unifier(self):return self._main_unifier
