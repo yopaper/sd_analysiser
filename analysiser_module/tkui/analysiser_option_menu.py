@@ -62,7 +62,7 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         # 模型資訊
         self.info_ui_frame = tk.LabelFrame( self.window, text="模型資訊" )
         self.info_ui_frame.grid( row=2, column=0, padx=6, pady=6 )
-        self.info_label = tk.Label(self.info_ui_frame, text="")
+        self.info_label = tk.Label(self.info_ui_frame, text="", justify="left")
         self.info_label.grid( row=0, column=0, padx=6, pady=6 )
 
         self.data_filter_ui.update()
@@ -125,11 +125,15 @@ class AnalysiserOptionMenu(basic_window.BasicWindow):
         info_msg = "\n"
         info_msg += "模型名稱: {0}\n".format(core.get_name() )
         info_msg += "提示詞: {0}\n".format(info.get_prompts())
+        checkpoint = info.get_checkpoint()
+        if( checkpoint!=None ):
+            info_msg += "Checkpoint: [{0}]\n".format( checkpoint.name )
+        else:info_msg += "Checkpoint: 無\n"
         info_msg += "訓練 Epoch: {0}\n".format(info.get_epoch())
         info_msg += "訓練 Batch Size: {0}\n".format( info.get_batch_size() )
         info_msg += "訓練 Learning Rate: {0}\n".format( info.get_learning_rate() )
         info_msg += "實際訓練資料數量: {0}\n".format( len( info.get_training_data_name_list() ) )
-        info_msg += "最低訓練損失: {0}\n".format( float( info.get_min_train_loss() ) )
+        info_msg += "最低訓練損失: {0}\n".format( round( float( info.get_min_train_loss() ) * 1e3) / 1e3 )
         self.info_label.config( text=info_msg )
     #---------------------------------------------------------------------------
     def _update_data_number_ui(self):

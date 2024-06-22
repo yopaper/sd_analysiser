@@ -1,10 +1,14 @@
 
 class AnalysiserProcessor:
-    def __init__(self, core, without_training_data:bool=True):
+    def __init__(self, core,
+                 without_training_data:bool=True,
+                 filter_with_checkpoint:bool=True,
+                 ):
         from . import analysiser_core, process_result, result_value_unifier
+        self._without_training_data = without_training_data
+        self._filter_with_checkpoint = filter_with_checkpoint
         self._core:analysiser_core.AnalysiserCore = core
         self._result_list:list[ process_result.ProcessResult ] = []
-        self._without_training_data = without_training_data
         self._main_unifier = result_value_unifier.ResultValueUnifier()
         self._prompt_number_unifier:dict[ int, result_value_unifier.ResultValueUnifier ] = {}
         self._prompt_group_unifier:dict[ str, result_value_unifier.ResultValueUnifier ] = {}
@@ -14,7 +18,7 @@ class AnalysiserProcessor:
         from .. import image_data_handler
         from random import random
         print("開始分析")
-        model = self._core.get_model().cuda()
+        model = self._core.get_model()
         model.load_weight()
         model.eval()
         self._result_list.clear()
@@ -22,6 +26,7 @@ class AnalysiserProcessor:
         def process_image_data(image_data:image_data_handler.ImageData):
             # 檢測排除訓練資料
             if( self._without_training_data and self._core.get_info().trained_with_data( image_data ) ):return
+            if( self._filter_with_checkpoint and image_data.get_checkpoint() != self._core.get_info().get_checkpoint() ):return
             print( "分析:{0}".format(image_data.file_name) )
             tensor_data = image_data.get_tensor_data()
             output = model( tensor_data )
@@ -42,8 +47,21 @@ class AnalysiserProcessor:
         #...............................................................
         image_datas = image_data_handler.get_image_datas()
         for img in image_datas:
-            if( random()<=0.965 ):continue
+            #if( random()<=0.6666 ):continue
             process_image_data( img )
+    #-------------------------------------------------------------------
+    def free(self):
+        print("Processor 釋放")
+        self._core.free_model()
+        del self._core
+        for result in self._result_list:
+            result.free()
+        self._result_list.clear()
+        del self._result_list
+        self._prompt_group_unifier.clear()
+        del self._prompt_group_unifier
+        self._prompt_number_unifier.clear()
+        del self._prompt_number_unifier
     #-------------------------------------------------------------------
     def get_main_unifier(self):return self._main_unifier
     def get_avg_correct_rate(self)->float:return self._main_unifier.get_avg_correct_rate()

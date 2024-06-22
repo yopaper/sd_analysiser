@@ -26,6 +26,8 @@ class ImageDataFilter:
             if( negative_flag ):
                 self._negative_result.append( data )
     #---------------------------------------------------------------------------
+    def get_checkpoint(self):return self.checkpoint
+    #---------------------------------------------------------------------------
     def get_result(self)->tuple[ image_data_handler.ImageData ]:
         return tuple( self._result )
     #---------------------------------------------------------------------------

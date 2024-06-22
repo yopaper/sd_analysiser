@@ -17,19 +17,21 @@ class ResultDisplayer(tk.LabelFrame):
         self.info_label = tk.Label( self.bar_group.get_frame(), text="", wraplength=150 )
         self.info_label.pack( side="top", pady=5 )
     #----------------------------------------------------------------------------------------------------
-    def _reset_displayer(self):
+    def reset_displayer(self):
         self.image_canvas.delete("all")
         self.mask_canvas.delete("all")
         self.info_label.config( text="" )
     #----------------------------------------------------------------------------------------------------
     def load_result(self, result):
         from .. import analysiser
-        self._reset_displayer()
+        self.reset_displayer()
         if( result==None ):return
         result:analysiser.process_result.ProcessResult = result
         image = result.get_image_data()
         self.image_canvas.create_image( (0, 0), anchor = "nw", image = result.get_image_data().get_tk_image() )
-        self.mask_canvas.create_image( (0, 0), anchor = "nw", image = result.get_predicted_mask() )
+        mask = result.get_predicted_mask()
+        if( mask != None ):
+            self.mask_canvas.create_image( (0, 0), anchor = "nw", image = mask )
         self.config( text=result.get_image_data().file_name )
         
         self.bar_group.load_result( result=result )
@@ -42,21 +44,49 @@ class ResultDisplayer(tk.LabelFrame):
 #========================================================================================================
 class DisplayerFrame( tk.Frame ):
     def __init__(self, master):
+        from . import page_ui
+        from .. import analysiser
         super().__init__( master=master )
-        tk.Label( self, text="個別圖片結果" ).pack(side="top")
+        top_frame = tk.Frame( self )
+        top_frame.pack( side="top" )
+        tk.Label( top_frame, text="個別圖片結果" ).pack(side="left")
+        self._page_ui = page_ui.PageUI( top_frame )
+        self._page_ui.main_frame.pack( side="left" )
+        self._displayer_number = 50
         self._displayers_list:list[ ResultDisplayer ] = []
+        self._loaded_results:list[ list[ analysiser.process_result.ProcessResult ] ] = []
+        self._page_ui.set_max_page_getter( lambda:len( self._loaded_results ) )
+        self._page_ui.set_page_change_event(
+            lambda:self.show_page( self._page_ui.get_current_page() )
+        )
+        for i in range(self._displayer_number):
+            displayer = ResultDisplayer( self )
+            self._displayers_list.append( displayer )
+            displayer.pack( side="top", padx=5, pady=10, fill="x" )
     #--------------------------------------------------------
     def load_processor( self, processor ):
         from .. import analysiser
-        for displayer in self._displayers_list:
-            displayer.destroy()
-        self._displayers_list.clear()
         processor:analysiser.analysiser_processor.AnalysiserProcessor = processor
         results = processor.get_results()
+        self._loaded_results.clear()
+        i = 0
+        current_list = []
         for result in results:
-            displayer = ResultDisplayer( self )
-            displayer.load_result( result )
-            displayer.pack( side="top", padx=10, pady=20 )
+            current_list.append( result )
+            i += 1
+            if( i >= self._displayer_number ):
+                i = 0
+                self._loaded_results.append( current_list )
+                current_list = []
+        if( i > 0 ):
+            self._loaded_results.append( current_list )
+        self.show_page(0)
+    #----------------------------------------------------------------------------------------------------
+    def show_page( self, page:int ):
+        if( page >= len( self._loaded_results ) ):return
+        results = self._loaded_results[page]
+        for i in range( len( results ) ):
+            self._displayers_list[ i ].load_result( results[i] )
 #========================================================================================================
 class AnalysiserViewerMenu(basic_window.BasicWindow):
     def __init__(self):
@@ -110,6 +140,10 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.without_training_data_var.set(True)
         self.without_training_data_button = tk.Checkbutton( self.result_filter_frame, text="排除訓練資料", variable=self.without_training_data_var )
         self.without_training_data_button.grid( column=0, row=0, padx=5, pady=5 )
+        self.filter_with_checkpoint_var = tk.BooleanVar(self.window)
+        self.filter_with_checkpoint_var.set(True)
+        self.filter_with_checkpoint_button = tk.Checkbutton( self.result_filter_frame, text="僅測試目標Checkpoint", variable=self.filter_with_checkpoint_var )
+        self.filter_with_checkpoint_button.grid( column=0, row=1, padx=5, pady=5 )
         
         # 整體分析結果
         self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.option_ui_frame, title="整體分析結果" )
@@ -153,7 +187,7 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
     #---------------------------------------------------------------------------------------------------
     def _click_to_start_process(self)->None:
         from . import messagebox, result_number_bar_group
-        from .. import analysiser
+        from .. import analysiser, gc
         core = self.analysiser_selecter.get_selected_core()
         if( core == None ):
             messagebox.showerror("錯誤", "未選擇模型")
@@ -164,8 +198,14 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
             messagebox.showerror("錯誤", "此模型未經訓練")
             return
         # 分析處理器
+        if( self._current_processor != None ):self._current_processor.free()
         self._current_processor = analysiser.analysiser_processor.AnalysiserProcessor(
-            core=core, without_training_data=self.without_training_data_var.get() )
+            core=core,
+            without_training_data=self.without_training_data_var.get(),
+            filter_with_checkpoint= self.filter_with_checkpoint_var.get(),
+            )
+        gc.collect()
+        analysiser.torch.cuda.empty_cache()
         self._current_processor.start()
         # 更新UI
         self.main_result_bar_group.load_unifier( self._current_processor.get_main_unifier() )

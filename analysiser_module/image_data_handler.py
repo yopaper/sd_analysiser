@@ -18,6 +18,7 @@ class ImageData:
         self.tk_image = None
         self.image_info = None
         self.prompt_table = None
+        self._tensor_data = None
         image_data_list.append( self )
     #-----------------------------------------------------------------------------
     def for_test(self)->bool:
@@ -71,7 +72,9 @@ class ImageData:
         return self.tk_image
     #-----------------------------------------------------------------------------
     def get_tensor_data(self)->analysiser.torch.Tensor:
-        return ImageData.transform( self.get_pil_image() ).cuda()
+        if( self._tensor_data==None ):
+            self._tensor_data = ImageData.transform( self.get_pil_image() ).cuda()
+        return self._tensor_data
     #-----------------------------------------------------------------------------
     def get_seed(self)->int:
         from . import info_key

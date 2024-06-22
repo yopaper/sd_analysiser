@@ -36,11 +36,20 @@ class ProcessResult:
         g_ch = (model_out - min_value)/value_delta
         b_ch = torch.zeros_like( model_out )
         color_mask = torch.stack( (r_ch, g_ch, b_ch), dim=0 )
-        pil_mask:Image.Image = ProcessResult.to_pil_transform( color_mask )
-        pil_mask = pil_mask.resize( (self._image_data.get_tk_image().width(), self._image_data.get_tk_image().height() ) )
-        self._predicted_mask_tkpil : ImageTk = ImageTk.PhotoImage( pil_mask )
-
+        original_size_mask:Image.Image = ProcessResult.to_pil_transform( color_mask )
+        original_size_mask = original_size_mask.resize( (self._image_data.get_tk_image().width(), self._image_data.get_tk_image().height() ) )
+        self._predicted_mask_pil = original_size_mask.resize( (self._image_data.get_tk_image().width(), self._image_data.get_tk_image().height() ) )
+        original_size_mask.close()
+        self._predicted_mask_tkpil : ImageTk = ImageTk.PhotoImage( self._predicted_mask_pil )
         
+    #-----------------------------------------------------------------
+    def free(self):
+        self._predicted_mask_pil.close()
+        del self._core
+        del self._image_data
+        del self._predicted_score
+        del self._image_positive
+        del self._predicted_mask_tkpil
     #-----------------------------------------------------------------
     def get_correct_rate(self)->float:
         return self._correct_rate
@@ -52,7 +61,8 @@ class ProcessResult:
     def get_score(self)->float:
         return self._predicted_score
     #-----------------------------------------------------------------
-    def get_predicted_mask(self):return self._predicted_mask_tkpil
+    def get_predicted_mask(self):
+        return self._predicted_mask_tkpil
     #-----------------------------------------------------------------
     def get_image_data(self):
         return self._image_data

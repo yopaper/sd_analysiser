@@ -19,7 +19,7 @@ class AnalysiserTrainer:
         self.batch_size = batch_size
         self.learn_rate = learn_rate
         self.core.free_model()
-        self.model = self.core.get_model().cuda()
+        self.model = self.core.get_model()
         self.loss = torch.nn.L1Loss()
         # Data Loader
         self.train_dataloader = torch_data.DataLoader(
@@ -44,6 +44,9 @@ class AnalysiserTrainer:
         info[ info_key.MIN_TRAIN_LOSS_KEY ] = self._min_train_loss
         info[ info_key.MIN_TEST_LOSS_KEY ] = self._min_test_loss
         info[ info_key.TRAIN_DATA_NAME_LIST ] = [data.get_name() for data in self.train_dataset.get_relative_image_data()]
+        checkpoint = self.data_filter.get_checkpoint()
+        if( checkpoint!=None ):
+            info[ info_key.CHECK_POINT_KEY ] = checkpoint.name
         return info
     #---------------------------------------------------------------------------
     def start_train(self)->None:

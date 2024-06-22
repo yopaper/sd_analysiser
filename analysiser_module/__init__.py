@@ -1,4 +1,4 @@
-import importlib
+import gc
 import os
 
 import tkinter as tk

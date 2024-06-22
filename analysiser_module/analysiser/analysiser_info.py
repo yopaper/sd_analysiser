@@ -23,6 +23,12 @@ class AnalysiserInfo:
             return self._info_dict[key]
         return None
     #-----------------------------------------------------------------------
+    def get_checkpoint(self):
+        from .. import checkpoints_loader, info_key
+        checkpoint_name = self.get_info_with_key(info_key.CHECK_POINT_KEY)
+        if( checkpoint_name==None ):return None
+        return checkpoints_loader.get_with_name( checkpoint_name )
+    #-----------------------------------------------------------------------
     def get_epoch(self)->int:
         from .. import info_key
         return self.get_info_with_key( info_key.EPOCH_KEY )
