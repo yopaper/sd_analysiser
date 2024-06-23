@@ -76,7 +76,8 @@ class PromptMapChartFrame(tk.Frame):
         self._map_canvas.create_line( redundant_zero_line, chart_top, redundant_zero_line, chart_bottom, fill="#BBBBBB", dash=(1, 1) )
         self._map_canvas.create_line( chart_left, lack_zero_line, chart_right, lack_zero_line, fill="#BBBBBB", dash=(1, 1) )
         self._map_canvas.create_rectangle( chart_left, chart_top, chart_right, chart_bottom, outline="#AAAAAA" )
-        
+        self._map_canvas.create_text( chart_right, chart_bottom, text="提示詞多餘", anchor="ne" )
+        self._map_canvas.create_text( chart_left, chart_top, text="提示詞缺失", anchor="sw" )
         print( self._max_redundant_rate, self._min_redundant_rate, self._max_lack_rate, self._min_lack_rate )
         for prompt in data_table:
             redundant_rate, lack_rate = data_table[ prompt ]

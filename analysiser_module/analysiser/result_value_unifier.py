@@ -8,6 +8,14 @@ class ResultValueUnifier:
         self._lack_rate_sum:float = 0
         self._lack_number:int = 0
     #-------------------------------------------------------------------
+    def get_dict_data(self)->dict[str, float]:
+        from .. import info_key
+        return{
+            info_key.AVG_CORRECT_RATE_KEY:self.get_avg_correct_rate(),
+            info_key.AVG_REDUNDANT_RATE_KEY:self.get_avg_redundant_rate(),
+            info_key.AVG_LACK_RATE_KEY:self.get_avg_lack_rate(),
+        }
+    #-------------------------------------------------------------------
     def add_result(self, result):
         from . import process_result
         result:process_result.ProcessResult = result

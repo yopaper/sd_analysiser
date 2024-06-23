@@ -6,6 +6,7 @@ class AnalysiserFile:
         self._base_path = config_data.analysiser_base_path + self.core.get_name() + "/"
         self._info_file_path = self._base_path + "analysiser_info.json"
         self._weight_file_path = self._base_path + "model_weight"
+        self._process_result_file_path = self._base_path + "process_result.json"
     #------------------------------------------------------------------
     def get_base_path(self)->str:
         _check_and_create_path( self._base_path )
@@ -18,6 +19,10 @@ class AnalysiserFile:
     def get_weight_file_path(self)->str:
         _check_and_create_path( self._base_path )
         return self._weight_file_path
+    #------------------------------------------------------------------
+    def get_process_result_file_path(self)->str:
+        _check_and_create_path( self._base_path )
+        return self._process_result_file_path
 #======================================================================
 
 # 檢查並建立目標路徑
