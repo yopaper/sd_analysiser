@@ -15,7 +15,7 @@ class AnalysiserProcessor:
     #-------------------------------------------------------------------
     def start(self)->None:
         from . import process_result, result_value_unifier
-        from .. import image_data_handler
+        from .. import image_data_handler, json
         from random import random
         print("開始分析")
         model = self._core.get_model()
@@ -49,6 +49,8 @@ class AnalysiserProcessor:
         for img in image_datas:
             #if( random()<=0.6666 ):continue
             process_image_data( img )
+        with open( self._core.get_file_handler().get_process_result_file_path(), "w" )as file_writer:
+            file_writer.write( json.dumps( self.get_dict_data() ) )
     #-------------------------------------------------------------------
     def free(self):
         print("Processor 釋放")
@@ -67,6 +69,35 @@ class AnalysiserProcessor:
     def get_avg_correct_rate(self)->float:return self._main_unifier.get_avg_correct_rate()
     def get_avg_redundant_rate(self)->float:return self._main_unifier.get_avg_redundant_rate()
     def get_avg_lack_rate(self)->float:return self._main_unifier.get_avg_lack_rate()
+    #-------------------------------------------------------------------
+    def get_dict_data(self)->dict:
+        from .. import info_key, prompt_tag
+        prompt_number_correct_table = {}
+        prompt_number_redundant_table = {}
+        prompt_number_lack_table = {}
+        number_table_key = self.get_prompt_number_table_key()
+        for key in number_table_key:
+            unifier = self.get_unifiier_with_prompt_number( key )
+            prompt_number_correct_table[key] = unifier.get_avg_correct_rate()
+            prompt_number_redundant_table[key] = unifier.get_avg_redundant_rate()
+            prompt_number_lack_table[key] = unifier.get_avg_lack_rate()
+        prompt_group_correct_table = {}
+        prompt_group_redundant_table = {}
+        prompt_group_lack_table = {}
+        for key in self._prompt_group_unifier:
+            unifier = self._prompt_group_unifier[key]
+            prompt_group_correct_table[key] = unifier.get_avg_correct_rate()
+            prompt_group_redundant_table[key] = unifier.get_avg_redundant_rate()
+            prompt_group_lack_table[key] = unifier.get_avg_lack_rate()
+        return{
+            info_key.RESULT_MAIN_DATA_KEY:self._main_unifier.get_dict_data(),
+            info_key.PROMPT_GROUP_CORRECT_KEY:prompt_group_correct_table,
+            info_key.PROMPT_GROUP_REDUNDANT_KEY:prompt_group_redundant_table,
+            info_key.PROMPT_GROUP_LACK_KEY:prompt_group_lack_table,
+            info_key.PROMPT_NUMBER_CORRECT_KEY:prompt_number_correct_table,
+            info_key.PROMPT_NUMBER_REDUNDANT_KEY:prompt_number_redundant_table,
+            info_key.PROMPT_NUMBER_LACK_KEY:prompt_number_lack_table,
+        }
     #-------------------------------------------------------------------
     def get_prompt_number_table_key(self)->tuple[int]:
         table_key = [pn for pn in self._prompt_number_unifier]
