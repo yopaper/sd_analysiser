@@ -37,9 +37,7 @@ class ResultDisplayer(tk.LabelFrame):
         self.bar_group.load_result( result=result )
         
         info_msg = ""
-        if( image.for_test() ):
-            info_msg += "<<測試資料>>\n"
-        info_msg += "提示詞: {0}\n".format( image.get_prompt() )
+        info_msg += "Prompt: {0}\n".format( image.get_prompt() )
         self.info_label.config( text=info_msg )
 #========================================================================================================
 class DisplayerFrame( tk.Frame ):
@@ -49,13 +47,13 @@ class DisplayerFrame( tk.Frame ):
         super().__init__( master=master )
         top_frame = tk.Frame( self )
         top_frame.pack( side="top" )
-        tk.Label( top_frame, text="個別圖片結果" ).pack(side="left")
+        tk.Label( top_frame, text="Result of Single Image" ).pack(side="left")
         self._page_ui = page_ui.PageUI( top_frame )
         self._page_ui.main_frame.pack( side="left" )
         self._displayer_number = 50
         self._displayers_list:list[ ResultDisplayer ] = []
         self._loaded_results:list[ list[ analysiser.process_result.ProcessResult ] ] = []
-        self._page_ui.set_max_page_getter( lambda:len( self._loaded_results ) )
+        self._page_ui.set_max_page_getter( lambda:len( self._loaded_results )+1 )
         self._page_ui.set_page_change_event(
             lambda:self.show_page( self._page_ui.get_current_page() )
         )
@@ -90,38 +88,43 @@ class DisplayerFrame( tk.Frame ):
 #========================================================================================================
 class AnalysiserViewerMenu(basic_window.BasicWindow):
     def __init__(self):
-        from . import analysiser_selection_combobox, result_number_bar_group, scroll_frame, prompt_map_chart_frame, prompt_number_chart_frame
+        from . import (
+            analysiser_selection_combobox, result_number_bar_group,
+            scroll_frame, prompt_map_chart_frame, prompt_number_chart_frame,
+            hex_chart
+            )
         from .. import analysiser, prompt_tag
 
         self._current_processor:analysiser.analysiser_processor.AnalysiserProcessor = None
-
+        ui_padding = 8
         super().__init__()
-        self.window.title("使用模型")
+        #self.window.resizable( width=False, height=True )
+        self.window.title("Uising Discriminator")
         self.option_ui_frame = tk.Frame( self.window )
-        self.option_ui_frame.grid( column=0, row=0, padx=6, pady=6 )
-        frame_height = 750
+        self.option_ui_frame.pack(side="left", padx=ui_padding, pady=ui_padding)
+        frame_height = 850
         # 提示詞數量分析 UI
-        self.prompt_number_ui_frame = scroll_frame.ScrollFrame( self.window, text="提示詞數量影響性", width=275, height=frame_height )
-        self.prompt_number_ui_frame.grid( column=2, row=0, padx=6, pady=6 )
+        self.prompt_number_ui_frame = scroll_frame.ScrollFrame( self.window, text="Influence of Prompts Number", width=275, height=frame_height )
+        self.prompt_number_ui_frame.pack(side="left", padx=ui_padding, pady=ui_padding)
         self.prompt_number_bar_group_table:dict[ int, result_number_bar_group.ResultNumberBarGroup ] = {}
         for i in range(1, 25):
             bar_group = result_number_bar_group.ResultNumberBarGroup(
-                self.prompt_number_ui_frame.get_frame(), title="提示詞數量:{0} 的表現數據".format(i) )
+                self.prompt_number_ui_frame.get_frame(), title="Prompts Number:{0}".format(i) )
             bar_group.get_frame().pack(side="top", padx=10, pady=4)
             self.prompt_number_bar_group_table[ i ] = bar_group
         self.prompt_number_ui_frame.update_scrollregion()
         # 提示詞影響分析 UI
-        self.prompt_group_ui_frame = scroll_frame.ScrollFrame( self.window, text="提示詞彼此影響性", width=275, height=frame_height )
-        self.prompt_group_ui_frame.grid( column=1, row=0, padx=6, pady=6 )
+        self.prompt_group_ui_frame = scroll_frame.ScrollFrame( self.window, text="Influence between Prompts", width=275, height=frame_height )
+        self.prompt_group_ui_frame.pack(side="left", padx=ui_padding, pady=ui_padding)
         self.prompt_group_bar_group_table:dict[ str, result_number_bar_group.ResultNumberBarGroup ] = {}
         for i in prompt_tag.get_all_prompts():
             bar_group = result_number_bar_group.ResultNumberBarGroup(
-                self.prompt_group_ui_frame.get_frame(), title="提示詞 \"{0}\" 存在的影響性".format(i) )
+                self.prompt_group_ui_frame.get_frame(), title="Influence from \"{0}\"".format(i) )
             bar_group.get_frame().pack(side="top", padx=10, pady=4)
             self.prompt_group_bar_group_table[i] = bar_group
         self.prompt_group_ui_frame.update_scrollregion()
         # 模型選擇群組
-        self.analysiser_selection_frame = tk.LabelFrame( self.option_ui_frame, text="選擇模型" )
+        self.analysiser_selection_frame = tk.LabelFrame( self.option_ui_frame, text="Discriminator Selection" )
         self.analysiser_selection_frame.grid( column=0, row=0, padx=5, pady=5 )
 
         self.analysiser_selecter = analysiser_selection_combobox.AnalysiserSelectionCombobox(self.analysiser_selection_frame)
@@ -131,39 +134,42 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.selected_core_info_label = tk.Label( self.analysiser_selection_frame, text="" )
         self.selected_core_info_label.grid( column=0, row=1, columnspan=2, padx=5, pady=5 )
 
-        self.start_process_button = tk.Button( self.analysiser_selection_frame, text="開始分析", command=self._click_to_start_process )
+        self.start_process_button = tk.Button( self.analysiser_selection_frame, text="Start", command=self._click_to_start_process )
         self.start_process_button.grid( column=1, row=0, padx=5, pady=5 )
         # 篩選群組
-        self.result_filter_frame = tk.LabelFrame( self.option_ui_frame, text="資料篩選" )
+        self.result_filter_frame = tk.LabelFrame( self.option_ui_frame, text="Data Filter" )
         self.result_filter_frame.grid( column=0, row=2, padx=5, pady=5, sticky="we" )
         self.without_training_data_var = tk.BooleanVar( self.window )
         self.without_training_data_var.set(True)
-        self.without_training_data_button = tk.Checkbutton( self.result_filter_frame, text="排除訓練資料", variable=self.without_training_data_var )
+        self.without_training_data_button = tk.Checkbutton( self.result_filter_frame, text="Exclude Training Data", variable=self.without_training_data_var )
         self.without_training_data_button.grid( column=0, row=0, padx=5, pady=5 )
         self.filter_with_checkpoint_var = tk.BooleanVar(self.window)
         self.filter_with_checkpoint_var.set(True)
-        self.filter_with_checkpoint_button = tk.Checkbutton( self.result_filter_frame, text="僅測試目標Checkpoint", variable=self.filter_with_checkpoint_var )
+        self.filter_with_checkpoint_button = tk.Checkbutton( self.result_filter_frame, text="Only Target Checkpoint", variable=self.filter_with_checkpoint_var )
         self.filter_with_checkpoint_button.grid( column=0, row=1, padx=5, pady=5 )
         
         # 整體分析結果
-        self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.option_ui_frame, title="整體分析結果" )
+        self.main_result_bar_group = result_number_bar_group.ResultNumberBarGroup( self.option_ui_frame, title="Overall AVG Result" )
         self.main_result_bar_group.get_frame().grid( column=0, row=3, padx=4, pady=4 )
 
         # 右側顯示框
         self.right_frame = scroll_frame.ScrollFrame( self.window, text = "", width=700, height=frame_height )
-        self.right_frame.grid( column=3, row=0, padx=6, pady=6 )
+        self.right_frame.pack(side="left", padx=ui_padding, pady=ui_padding)
         # 個別結果顯示
         self.displayer_frame = DisplayerFrame( self.right_frame.get_frame() )
         # 提示詞數量關係表
         self.prompt_number_chart = prompt_number_chart_frame.PromptNumberChartFrame( self.right_frame.get_frame() )
         # 提示詞彼此影響
         self.prompt_map_chart = prompt_map_chart_frame.PromptMapChartFrame( self.right_frame.get_frame() )
+        self.prompt_correct_hex_chart = hex_chart.HexChart( self.right_frame.get_frame() )
+        self.prompt_lack_hex_chart = hex_chart.HexChart( self.right_frame.get_frame() )
+        self.prompt_redundant_hex_chart = hex_chart.HexChart( self.right_frame.get_frame() )
         # 右側選項框
         self.right_option_frame = tk.LabelFrame( self.window )
-        self.right_option_frame.grid( column=4, row=0, padx=10, pady=10, sticky="n" )
-        tk.Button( self.right_option_frame, text="個別圖片結果", command=self._show_displayer_frame ).pack(side="top", padx=8, pady=8)
-        tk.Button( self.right_option_frame, text="提示詞數量關係", command=self._show_prompt_number_chart ).pack(side="top", padx=8, pady=8)
-        tk.Button( self.right_option_frame, text="提示詞彼此影響", command=self._show_prompt_map_chart ).pack(side="top", padx=8, pady=8)
+        self.right_option_frame.pack(side="left", padx=ui_padding, pady=ui_padding)
+        tk.Button( self.right_option_frame, text="Single Image Result", command=self._show_displayer_frame ).pack(side="top", padx=8, pady=8)
+        tk.Button( self.right_option_frame, text="Number of Prompts Influence", command=self._show_prompt_number_chart ).pack(side="top", padx=8, pady=8)
+        tk.Button( self.right_option_frame, text="Prompts-Prompts Influence", command=self._show_prompt_map_chart ).pack(side="top", padx=8, pady=8)
         self.window_center()
         self._update_info_label()
     #---------------------------------------------------------------------------------------------------
@@ -171,23 +177,32 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
         self.prompt_number_chart.pack_forget()
         self.displayer_frame.pack()
         self.prompt_map_chart.pack_forget()
+        self.prompt_correct_hex_chart.pack_forget()
+        self.prompt_lack_hex_chart.pack_forget()
+        self.prompt_redundant_hex_chart.pack_forget()
         self.right_frame.update_scrollregion()
     #---------------------------------------------------------------------------------------------------
     def _show_prompt_number_chart(self):
         self.prompt_number_chart.pack()
         self.displayer_frame.pack_forget()
         self.prompt_map_chart.pack_forget()
+        self.prompt_correct_hex_chart.pack_forget()
+        self.prompt_lack_hex_chart.pack_forget()
+        self.prompt_redundant_hex_chart.pack_forget()
         self.right_frame.update_scrollregion()
     #---------------------------------------------------------------------------------------------------
     def _show_prompt_map_chart(self):
         self.prompt_number_chart.pack_forget()
         self.displayer_frame.pack_forget()
         self.prompt_map_chart.pack()
+        self.prompt_correct_hex_chart.pack()
+        self.prompt_lack_hex_chart.pack()
+        self.prompt_redundant_hex_chart.pack()
         self.right_frame.update_scrollregion()
     #---------------------------------------------------------------------------------------------------
     def _click_to_start_process(self)->None:
         from . import messagebox, result_number_bar_group
-        from .. import analysiser, gc
+        from .. import analysiser, gc, prompt_tag
         core = self.analysiser_selecter.get_selected_core()
         if( core == None ):
             messagebox.showerror("錯誤", "未選擇模型")
@@ -222,6 +237,28 @@ class AnalysiserViewerMenu(basic_window.BasicWindow):
             if( unifier != None ):
                 bar_group.load_unifier(unifier)
             else:bar_group.reset()
+        # 更新多邊形圖
+        self.prompt_correct_hex_chart.reset(max_value=0.75, min_value=0.25)
+        self.prompt_lack_hex_chart.reset(max_value=0.5, min_value=0)
+        self.prompt_redundant_hex_chart.reset(max_value=0.5, min_value=0)
+        for i in prompt_tag.get_all_prompts():
+            unifier = self._current_processor.get_unifier_with_prompt_group( i )
+            if( unifier==None ):continue
+            self.prompt_correct_hex_chart.add_data( i, unifier.get_avg_correct_rate() )
+            self.prompt_lack_hex_chart.add_data( i, unifier.get_avg_lack_rate() )
+            self.prompt_redundant_hex_chart.add_data( i, unifier.get_avg_redundant_rate() )
+        # 處理多邊形標題
+        target_prompts_tuple = self._current_processor.get_core().get_info().get_prompts()
+        target_prompts = " "
+        for i in target_prompts_tuple:
+            target_prompts += "[{0}] ".format(i)
+        self.prompt_correct_hex_chart.set_title( "Correct Rate\n{0}".format(target_prompts) )
+        self.prompt_lack_hex_chart.set_title( "Lack Rate\n{0}".format(target_prompts) )
+        self.prompt_redundant_hex_chart.set_title( "Redundant Rate\n{0}".format(target_prompts) )
+        self.prompt_correct_hex_chart.draw_chart()
+        self.prompt_lack_hex_chart.draw_chart()
+        self.prompt_redundant_hex_chart.draw_chart()
+
         self.displayer_frame.load_processor( self._current_processor )
         self.prompt_number_chart.load_processor( self._current_processor )
         self.prompt_map_chart.load_processor( self._current_processor )

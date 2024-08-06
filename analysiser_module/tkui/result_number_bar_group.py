@@ -3,22 +3,31 @@ class ResultNumberBarGroup:
     def __init__(self, master, title:str="", has_score_bar:bool=False):
         from . import tk, number_bar
         self._main_frame = tk.LabelFrame( master=master, text=title )
+        self._bar_frame = tk.Frame( self._main_frame )
+        self._bar_frame.pack()
+
         self._has_score_bar = has_score_bar
-        bar_pady = 1
         self._score_bar : number_bar.NumberBar = None
+        grid_row = 0
         if( has_score_bar ):
-            self._score_bar = number_bar.NumberBar( self._main_frame )
-            self._score_bar.set_title("信心分數")
-            self._score_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
-        self._correct_bar = number_bar.NumberBar( self._main_frame )
-        self._correct_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
-        self._correct_bar.set_title("提示詞正確率")
-        self._redundant_bar = number_bar.NumberBar( self._main_frame )
-        self._redundant_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
-        self._redundant_bar.set_title("提示詞多餘率")
-        self._lack_bar = number_bar.NumberBar( self._main_frame )
-        self._lack_bar.get_frame().pack( side="top", padx=3, pady=bar_pady )
-        self._lack_bar.set_title("提示詞缺失率")
+            self._score_bar = number_bar.NumberBar( self._bar_frame )
+            self._score_bar.set_title("％Confidence")
+            self._score_bar.grid(column=0, row=grid_row)
+            grid_row += 1
+        self._correct_bar = number_bar.NumberBar( self._bar_frame )
+        self._correct_bar.grid(column=0, row=grid_row)
+        self._correct_bar.set_title("✓Correct")
+        grid_row += 1
+
+        self._redundant_bar = number_bar.NumberBar( self._bar_frame )
+        self._redundant_bar.grid(column=0, row=grid_row)
+        self._redundant_bar.set_title("＋Redundant")
+        grid_row += 1
+
+        self._lack_bar = number_bar.NumberBar( self._bar_frame )
+        self._lack_bar.grid(column=0, row=grid_row)
+        self._lack_bar.set_title("－Lack")
+        grid_row += 1
         self.reset()
     #-------------------------------------------------------------------------
     def get_frame(self):return self._main_frame
@@ -26,8 +35,8 @@ class ResultNumberBarGroup:
     def reset(self):
         from . import number_bar
         def reset_bar( bar:number_bar.NumberBar ):
-            bar.set_bar_length_rate(0, "#666666", "#666666")
-            bar.set_number( "無數據" )
+            bar.set_bar_length_rate(0, "#666666")
+            bar.set_number( "No Data" )
         #...................................................................
         if( self._has_score_bar ):
             reset_bar( self._score_bar )
@@ -37,7 +46,7 @@ class ResultNumberBarGroup:
     #------------------------------------------------------------------------------------------------
     def set_bar_value(self, score:float, correct_rate:float, redundant_rate:float, lack_rate:float):
         def to_percent(value)->str:
-            value = round( value*1e5 )/1e3
+            value = round( value*1e2 )
             return "{0}%".format( value )
         #..............................................................
         def get_bar_color(value)->str:
@@ -52,7 +61,7 @@ class ResultNumberBarGroup:
         #...............................................................
         # Score
         if( self._has_score_bar ):
-            self._score_bar.set_bar_length_rate( rate=score )
+            self._score_bar.set_bar_length_rate( rate=score, bar_color="#999" )
             self._score_bar.set_number( to_percent( score ) )
         # Correct Rate
         bar_color = get_bar_color( correct_rate )
@@ -64,7 +73,7 @@ class ResultNumberBarGroup:
             self._redundant_bar.set_bar_length_rate( rate=redundant_rate, bar_color=bar_color )
             self._redundant_bar.set_number( to_percent( redundant_rate ) )
         else:
-            self._redundant_bar.set_bar_length_rate(rate=1, bar_color="#FFFFFF", bg_color="#111111")
+            self._redundant_bar.set_bar_length_rate(rate=1, bar_color="#FFFFFF" )
             self._redundant_bar.set_number("None")
         # Lack Rate
         if( lack_rate != None ):
@@ -72,7 +81,7 @@ class ResultNumberBarGroup:
             self._lack_bar.set_bar_length_rate( rate=lack_rate, bar_color=bar_color )
             self._lack_bar.set_number( to_percent( lack_rate ) )
         else:
-            self._lack_bar.set_bar_length_rate( rate=1, bar_color="#FFFFFF", bg_color="#111111" )
+            self._lack_bar.set_bar_length_rate( rate=1, bar_color="#FFFFFF" )
             self._lack_bar.set_number("None")
     #------------------------------------------------------------------------------------------------
     def load_unifier(self, unifier):

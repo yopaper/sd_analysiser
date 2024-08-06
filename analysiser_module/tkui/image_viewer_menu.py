@@ -9,7 +9,7 @@ class ImageDisplayer:
         self.displayer_group = tk.Frame(master)
         self.canvas = tk.Canvas( self.displayer_group, width=config_data.display_image_width, height=config_data.display_image_height )
         self.info_label = tk.Label( self.displayer_group, text="" )
-        self.info_button = tk.Label( self.displayer_group, text="資訊" )
+        self.info_button = tk.Label( self.displayer_group, text="Information" )
         self.canvas.grid(row=0, column=0)
         self.info_label.grid(row=0, column=1)
         self.image_data = None
@@ -27,14 +27,14 @@ class ImageDisplayer:
         self.image_data = image_data
         info_dict = image_data.get_info()
         info_str = ""
-        info_str += "●檔案名稱:\n{0}\n".format( image_data.file_name )
+        info_str += "●File Name:\n{0}\n".format( image_data.file_name )
         if( info_key.PROMPT_KEY in info_dict ):
-            info_str += "●提示詞:\n{0}\n".format( info_dict[ info_key.PROMPT_KEY ] )
+            info_str += "●Prompts:\n{0}\n".format( info_dict[ info_key.PROMPT_KEY ] )
         if( info_key.SEED_KEY in info_dict ):
-            info_str += "●種子:\n{0}\n".format( info_dict[ info_key.SEED_KEY ] )
+            info_str += "●Random Seed:\n{0}\n".format( info_dict[ info_key.SEED_KEY ] )
         checkpoint = image_data.get_checkpoint()
         if( checkpoint!=None ):
-            info_str += "●Checkpoint模型:\n{0}\n".format( checkpoint.name )
+            info_str += "●Checkpoint:\n{0}\n".format( checkpoint.name )
         self.info_label.config(text=info_str)
         #print("開始繪製")
         self.canvas.create_image( (0, 0), anchor="nw", image=image_data.get_tk_image() )
@@ -46,7 +46,7 @@ class ImageViewerMenu(basic_window.BasicWindow):
         from . import filter_ui
         from .. import image_data_handler
         super().__init__()
-        self.window.title("圖片資料瀏覽")
+        self.window.title("Image Data Viewer")
         self.image_to_show = image_data_handler.get_image_datas()
 
         self.left_ui_group = tk.Frame(self.window)
@@ -56,26 +56,26 @@ class ImageViewerMenu(basic_window.BasicWindow):
         self.filter_ui.grid( column=0, row=2 )
         self.filter_ui.set_click_event( self.on_filter_ui_update )
 
-        self.exit_button = tk.Button( self.window, text=" 返回 ", command=self.close )
+        self.exit_button = tk.Button( self.window, text=" Back ", command=self.close )
         self.exit_button.grid( column=2, row=0 )
         # 頁面切換UI
-        self.page_ui_group = tk.LabelFrame( self.left_ui_group, text="頁面" )
+        self.page_ui_group = tk.LabelFrame( self.left_ui_group, text=" Page " )
         self.page_ui_group.grid( column=0, row=0 )
         # 上一頁
-        self.last_page_button = tk.Button( self.page_ui_group, text="上一頁", command=lambda delta=-1:self.change_page(delta) )
+        self.last_page_button = tk.Button( self.page_ui_group, text="Last", command=lambda delta=-1:self.change_page(delta) )
         self.last_page_button.grid( column=0, row=0, padx=4, pady=4 )
         # 頁數Label
         self.page_label = tk.Label( self.page_ui_group, text="" )
         self.page_label.grid( column=1, row=0, padx=4, pady=4 )
         # 下一頁
-        self.next_page_button = tk.Button( self.page_ui_group, text="下一頁", command=lambda delta=1:self.change_page(delta) )
+        self.next_page_button = tk.Button( self.page_ui_group, text="Next", command=lambda delta=1:self.change_page(delta) )
         self.next_page_button.grid( column=2, row=0, padx=4, pady=4 )
 
         self.page = 0
-        image_group_width = 3; image_group_height = 2
+        image_group_width = 2; image_group_height = 3
         self.displayer_number = image_group_width * image_group_height
         # 圖片展示群組
-        self.image_group = tk.LabelFrame( self.window, text="圖片" )
+        self.image_group = tk.LabelFrame( self.window, text="Images" )
         self.image_group.grid( column=1, row=1, rowspan=1, padx=8, pady=8 )
         self.displayer_list = []
         for y in range(image_group_height):

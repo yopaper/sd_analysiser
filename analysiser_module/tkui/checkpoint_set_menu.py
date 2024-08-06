@@ -5,9 +5,9 @@ class CheckPointSetMenu(basic_window.BasicWindow):
     def __init__(self):
         from .. import checkpoints_loader
         super().__init__()
-        self.window.title("設定Checkpoint")
+        self.window.title("Checkpoint")
         # Checkpoin 按鈕群組
-        tk.Label(self.window, text="可用的Checkpoint").grid(row=0, column=0)
+        tk.Label(self.window, text="Available Checkpoint").grid(row=0, column=0)
         self.selected_checkpoint_title = tk.StringVar()
         self.checkpoint_button_table = {}
         i = 1
@@ -18,8 +18,8 @@ class CheckPointSetMenu(basic_window.BasicWindow):
             i += 1
         self.checkpoint_button_table[ checkpoints_loader.current_checkpoint.title ].select()
         # 其他按鈕
-        self.exit_button = tk.Button( self.window, text="關閉", command=self.close )
+        self.exit_button = tk.Button( self.window, text="Close", command=self.close )
         self.exit_button.grid(row=0, column=1)
-        self.apply_button = tk.Button( self.window, text="套用" )
+        self.apply_button = tk.Button( self.window, text="Apply" )
         self.window_center()
 #=========================================================================================

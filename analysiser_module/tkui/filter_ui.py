@@ -10,7 +10,7 @@ class PromptFilterUI:
         self.enable_prompts = []
         self.master = master
 
-        self.main_frame = tk.LabelFrame( master, text="提示詞篩選" )
+        self.main_frame = tk.LabelFrame( master, text="Prompts Filter" )
         self.prompt_filter_listbox = tk.Listbox( self.main_frame, selectmode=tk.SINGLE )
         self.prompt_filter_listbox.grid( column=0, row=0, padx=6, pady=6 )
         self.prompt_filter_listbox.bind("<<ListboxSelect>>", self.on_listbox_selected)
@@ -18,19 +18,19 @@ class PromptFilterUI:
             self.prompt_filter_listbox.insert( "end", "－ " + prompt )
 
         self.filter_mode_var = tk.StringVar( self.main_frame )
-        self.filter_mode_frame = tk.LabelFrame( self.main_frame, text="篩選原則" )
+        self.filter_mode_frame = tk.LabelFrame( self.main_frame, text="Rule of Filtering Prompts" )
         self.filter_mode_frame.grid( column=0, row=1, padx=6, pady=6 )
         self.and_mode_button = tk.Radiobutton(
-            self.filter_mode_frame, text="僅有特定提示詞", command=lambda:self.on_click(),
+            self.filter_mode_frame, text="Only Has Target Prompts", command=lambda:self.on_click(),
             value=image_data_filter.ImageDataFilter.AND_MODE, variable=self.filter_mode_var )
         self.and_mode_button.grid( column=0, row=0, padx=8 )
         self.or_mode_button = tk.Radiobutton(
-            self.filter_mode_frame, text="包含特定提示詞", command=lambda:self.on_click(),
+            self.filter_mode_frame, text="Including Target Prompts", command=lambda:self.on_click(),
             value=image_data_filter.ImageDataFilter.OR_MODE, variable=self.filter_mode_var )
         self.or_mode_button.grid( column=0, row=1, padx=8 )
         self.filter_mode_var.set( image_data_filter.ImageDataFilter.OR_MODE )
 
-        self.enable_prompts_frame = tk.LabelFrame( self.main_frame, text="已選擇提示詞" )
+        self.enable_prompts_frame = tk.LabelFrame( self.main_frame, text="Selected Prompts" )
         self.enable_prompts_frame.grid( column=0, row=2, padx=6, pady=6 )
         self.enable_prompts_label = tk.Label( self.enable_prompts_frame, wraplength=200 )
         self.enable_prompts_label.grid( column=0, row=2, padx=4, pady=4 )
@@ -72,13 +72,13 @@ class PromptFilterUI:
 #=====================================================================================
 class CheckpointFilterUI:
     from .. import checkpoints_loader
-    NULL_SELECTION = "# 不選擇 #"
+    NULL_SELECTION = "# No Selection #"
     def __init__(self, master, have_null:bool=True):
         from . import ttk
         from .. import checkpoints_loader
         self.master = master
 
-        self.main_frame = tk.LabelFrame( master, text="Checkpoint篩選" )
+        self.main_frame = tk.LabelFrame( master, text="Checkpoint Filter" )
         selection_list = [cp.name for cp in checkpoints_loader.get_all_chechpoints()]
         if( have_null ):selection_list.insert( 0, CheckpointFilterUI.NULL_SELECTION )
         self.selection_combobox = ttk.Combobox(
@@ -135,7 +135,7 @@ class FullFilterUI:
         )
         data_number = len(self.current_filter.get_result())
         negative_data_number = len( self.current_filter.get_negative_result() )
-        self.data_number_label.config( text="符合圖片數量: {0}\n相反圖片數量: {1}".format(data_number, negative_data_number) )
+        self.data_number_label.config( text="Positive Images Number: {0}\nNegative Images Number: {1}".format(data_number, negative_data_number) )
         if( self.on_click!=None ):self.on_click()
     #-----------------------------------------------------------------------------------
     def set_click_event( self, event ):

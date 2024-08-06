@@ -10,44 +10,44 @@ class ImageGeneratorMenu(basic_window.BasicWindow):
         self.enable_fix_prompts = []
         self.enable_arranged_prompts = []
 
-        self.window.title("圖片生成")
+        self.window.title("Image Generator")
 
-        tk.Label( self.window, text="未啟用提示詞" ).grid( column=0, row=1 )
-        tk.Label( self.window, text="固定提示詞" ).grid( column=1, row=1 )
-        tk.Label( self.window, text="排序提示詞" ).grid( column=2, row=1 )
-        tk.Label( self.window, text="排列組合預覽" ).grid( column=3, row=1 )
+        tk.Label( self.window, text="Disabled" ).grid( column=0, row=1 )
+        tk.Label( self.window, text="Fixed" ).grid( column=1, row=1 )
+        tk.Label( self.window, text="In Combinations" ).grid( column=2, row=1 )
+        tk.Label( self.window, text="Combinations Preview" ).grid( column=3, row=1 )
         # Prompt Button
-        self.disabled_button = tk.Button(self.window, text="設為不啟用", command=lambda target_list=None:self.set_selection_to_list(target_list))
-        self.disabled_button.grid( column=0, row=0 )
-        self.fix_button = tk.Button(self.window, text="設為固定", command=lambda target_list=self.enable_fix_prompts:self.set_selection_to_list(target_list))
-        self.fix_button.grid( column=1, row=0 )
-        self.arranged_button = tk.Button(self.window, text="設為排序", command=lambda target_list=self.enable_arranged_prompts:self.set_selection_to_list(target_list))
-        self.arranged_button.grid( column=2, row=0 )
+        self.disabled_button = tk.Button(self.window, text="Set as Disabled", command=lambda target_list=None:self.set_selection_to_list(target_list))
+        self.disabled_button.grid( column=0, row=0, padx=6, pady=6 )
+        self.fix_button = tk.Button(self.window, text="Set as Fixed", command=lambda target_list=self.enable_fix_prompts:self.set_selection_to_list(target_list))
+        self.fix_button.grid( column=1, row=0, padx=6, pady=6 )
+        self.arranged_button = tk.Button(self.window, text="Set as Combinations", command=lambda target_list=self.enable_arranged_prompts:self.set_selection_to_list(target_list))
+        self.arranged_button.grid( column=2, row=0, padx=6, pady=6 )
 
         # Prompt Listbox
         list_box_rowspan = 8
         self.disabled_prompt_listbox = tk.Listbox(self.window, width=15)
-        self.disabled_prompt_listbox.grid( column=0, row=2, rowspan=list_box_rowspan )
+        self.disabled_prompt_listbox.grid( column=0, row=2, rowspan=list_box_rowspan, padx=6, pady=6 )
         self.bind_listbox_select( self.disabled_prompt_listbox )
 
         self.fix_prompt_listbox = tk.Listbox(self.window, width=15)
-        self.fix_prompt_listbox.grid( column=1, row=2, rowspan=list_box_rowspan )
+        self.fix_prompt_listbox.grid( column=1, row=2, rowspan=list_box_rowspan, padx=6, pady=6 )
         self.bind_listbox_select( self.fix_prompt_listbox )
 
         self.arranged_prompt_listbox = tk.Listbox(self.window, width=15)
-        self.arranged_prompt_listbox.grid( column=2, row=2, rowspan=list_box_rowspan )
+        self.arranged_prompt_listbox.grid( column=2, row=2, rowspan=list_box_rowspan, sticky="we", padx=6, pady=6 )
         self.bind_listbox_select( self.arranged_prompt_listbox )
 
         self.demo_prompt_listbox = tk.Listbox(self.window, width=40)
-        self.demo_prompt_listbox.grid( column=3, row=2, rowspan=list_box_rowspan )
+        self.demo_prompt_listbox.grid( column=3, row=2, rowspan=list_box_rowspan, padx=6, pady=6 )
 
         # 右側UI
-        self.exit_button = tk.Button( self.window, text="返回", command=self.close )
+        self.exit_button = tk.Button( self.window, text="Back", command=self.close )
         self.exit_button.grid( column=6, row=0 )
 
-        self.start_generate_button = tk.Button( self.window, text="開始生成", command=self.start_generate_image )
+        self.start_generate_button = tk.Button( self.window, text="Start Generate", command=self.start_generate_image )
         self.start_generate_button.grid( column=4, row=2 )
-        tk.Label( self.window, text="圖片生成量" ).grid( column=4, row=3 )
+        tk.Label( self.window, text="Number of Each Combinations" ).grid( column=4, row=3 )
         self.image_number_box = tk.Spinbox( self.window, from_=1, to=896400 )
         self.image_number_box.grid( column=5, row=3 )
 
@@ -71,7 +71,7 @@ class ImageGeneratorMenu(basic_window.BasicWindow):
             if( len(listbox_select)<=0 ):return
             select_index = listbox_select[0]
             self.selected_prompt = listbox.get( select_index )
-            print( "選擇:{0}".format(self.selected_prompt) )
+            print( "Selected:{0}".format(self.selected_prompt) )
         listbox.bind( "<<ListboxSelect>>", select_function )
     #-------------------------------------------------------------------------------------
     def start_generate_image(self):

@@ -21,7 +21,7 @@ class PromptMapChartFrame(tk.Frame):
             height=self._canvas_height + 2*self._padding
         )
         self._map_canvas.grid( column=0, row=0 )
-        self._button_frame = tk.LabelFrame( self, text="顯示/隱藏" )
+        self._button_frame = tk.LabelFrame( self, text="Show/Hide" )
         self._button_frame.grid( column=1, row=0, padx=8, pady=8 )
 
         self._text_table:dict[str, MapText] = {}
@@ -51,8 +51,8 @@ class PromptMapChartFrame(tk.Frame):
             if( unifier == None ):return
             redundant_rate = unifier.get_avg_redundant_rate()
             lack_rate = unifier.get_avg_lack_rate()
-            if( redundant_rate==None ):redundant_rate = 0
-            if( lack_rate==None ):lack_rate = 0
+            if( redundant_rate==None ):return
+            if( lack_rate==None ):return
             value_padding = 0.05
             self._max_redundant_rate = max( self._max_redundant_rate, redundant_rate + value_padding )
             self._min_redundant_rate = min( self._min_redundant_rate, redundant_rate - value_padding )
@@ -76,8 +76,8 @@ class PromptMapChartFrame(tk.Frame):
         self._map_canvas.create_line( redundant_zero_line, chart_top, redundant_zero_line, chart_bottom, fill="#BBBBBB", dash=(1, 1) )
         self._map_canvas.create_line( chart_left, lack_zero_line, chart_right, lack_zero_line, fill="#BBBBBB", dash=(1, 1) )
         self._map_canvas.create_rectangle( chart_left, chart_top, chart_right, chart_bottom, outline="#AAAAAA" )
-        self._map_canvas.create_text( chart_right, chart_bottom, text="提示詞多餘", anchor="ne" )
-        self._map_canvas.create_text( chart_left, chart_top, text="提示詞缺失", anchor="sw" )
+        self._map_canvas.create_text( chart_right, chart_bottom, text="Prompt Redundant", anchor="ne" )
+        self._map_canvas.create_text( chart_left, chart_top, text="Prompts Lack", anchor="sw" )
         print( self._max_redundant_rate, self._min_redundant_rate, self._max_lack_rate, self._min_lack_rate )
         for prompt in data_table:
             redundant_rate, lack_rate = data_table[ prompt ]

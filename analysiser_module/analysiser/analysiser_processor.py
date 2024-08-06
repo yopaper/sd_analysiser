@@ -65,6 +65,7 @@ class AnalysiserProcessor:
         self._prompt_number_unifier.clear()
         del self._prompt_number_unifier
     #-------------------------------------------------------------------
+    def get_core(self):return self._core
     def get_main_unifier(self):return self._main_unifier
     def get_avg_correct_rate(self)->float:return self._main_unifier.get_avg_correct_rate()
     def get_avg_redundant_rate(self)->float:return self._main_unifier.get_avg_redundant_rate()

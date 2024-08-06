@@ -7,7 +7,7 @@ class WaitSDWindow(basic_window.BasicWindow):
         super().__init__()
         self.window.title("Waiting Stable Diffusion")
         self.window.geometry("400x50+150+150")
-        tk.Label( self.window, text="等待 Stable Diffusion 開啟中..." ).place(x=50, y=10)
+        tk.Label( self.window, text="Waiting for Stable Diffusion..." ).place(x=50, y=10)
         self.window_center()
     #-------------------------------------------------------------------------------------
     def open(self):

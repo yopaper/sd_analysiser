@@ -80,20 +80,20 @@ class PromptNumberChartFrame( tk.Frame ):
         pady = 8
         self._correct_rate_chart = ChartCanvas( self )
         self._correct_rate_chart.set_title(
-            data_title="提示詞正確率",
-            key_title="提示詞數量"
+            data_title="Prompts Correct",
+            key_title="Prompts Number"
         )
         self._correct_rate_chart.grid( column=0, row=0, padx=5, pady=pady )
         self._redundant_rate_chart = ChartCanvas( self )
         self._redundant_rate_chart.set_title(
-            data_title="提示詞多餘率",
-            key_title="提示詞數量"
+            data_title="Prompts Redundant",
+            key_title="Prompts Number"
         )
         self._redundant_rate_chart.grid( column=0, row=1, padx=5, pady=pady )
         self._lack_rate_chart = ChartCanvas( self )
         self._lack_rate_chart.set_title(
-            data_title="提示詞缺失率",
-            key_title="提示詞數量"
+            data_title="Prompts Lack",
+            key_title="Prompts Number"
         )
         self._lack_rate_chart.grid( column=0, row=2, padx=5, pady=pady )
 

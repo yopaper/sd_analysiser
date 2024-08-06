@@ -19,3 +19,4 @@ from . import analysiser_option_menu
 from . import analysiser_viewer_menu
 from . import prompt_number_chart_frame
 from . import analysiser_selection_combobox
+from . import hex_chart

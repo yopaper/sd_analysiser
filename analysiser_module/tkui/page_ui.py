@@ -5,10 +5,10 @@ class PageUI:
         self._current_page = 0
         self._max_page_getter = None
         self._after_page_change = None
-        self.main_frame = tk.LabelFrame( master=master, text="頁面" )
-        self.last_page_button = tk.Button( self.main_frame, text="上一頁", command=lambda delta=-1:self._change_page( delta=delta ) )
+        self.main_frame = tk.LabelFrame( master=master, text="Page" )
+        self.last_page_button = tk.Button( self.main_frame, text="Next", command=lambda delta=-1:self._change_page( delta=delta ) )
         self.last_page_button.grid( column=0, row=0, padx=8, pady=8 )
-        self.next_page_button = tk.Button( self.main_frame, text="下一頁", command=lambda delta= 1:self._change_page( delta=delta ) )
+        self.next_page_button = tk.Button( self.main_frame, text="Last", command=lambda delta= 1:self._change_page( delta=delta ) )
         self.next_page_button.grid( column=2, row=0, padx=8, pady=8 )
         self.page_label = tk.Label( self.main_frame, text="" )
         self.page_label.grid( column=1, row=0, padx=8, pady=8 )
